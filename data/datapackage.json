@@ -1,0 +1,10 @@
+{
+	"resources": [
+		{
+			"name": "index",
+			"path": "./index.tsv",
+			"hide": true
+		},
+		"./DESeq2.bound_vs_unbound.tsv"
+	]
+}

@@ -1,0 +1,5 @@
+filename	name	gene
+DESeq2.bound_vs_unbound.tsv	Bound vs unbound (DESeq2)	Pcp2 Cacna1g
+edgeR.bound_vs_unbound.tsv	Bound vs unbound (edgeR)	Pcp2 Cacna1g
+DESeq2.bmemb_vs_bcyto.tsv	Bound membrane vs bound cytoplasm (DESeq2)	Pcp2 Cacna1g
+edgeR.bmemb_vs_bcyto.tsv	Bound membrane vs bound cytoplasm (edgeR)	Pcp2 Cacna1g
