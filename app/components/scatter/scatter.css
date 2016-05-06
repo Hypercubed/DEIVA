@@ -1,0 +1,108 @@
+._scatter .axis path,
+._scatter .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+._scatter circle {
+  stroke: none;
+  shape-rendering: optimizeSpeed;
+}
+
+._scatter .hexagons {
+  stroke: none;
+  shape-rendering: optimizeSpeed;
+}
+
+._scatter .extent {
+  fill: #000;
+  fill-opacity: .125;
+  stroke: #fff;
+}
+
+@media (min-width: 992px) {
+  .chart-height {
+    height: 550px;
+    overflow-y: auto;
+  }
+}
+
+.chart-well {
+  position: relative;
+}
+
+.toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.expression-grid {
+  font-size: 12px;
+}
+
+.introjs-tooltip {
+  min-width: 200px;
+  max-width: 500px !important;
+}
+
+#_scatter__chart.hover {
+
+}
+
+._scatter {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+._scatter.dirty .spinner-icon {
+  position:absolute;
+  left:50%;
+  margin-left:-14px;
+  top:50%;
+  margin-top:-15px;
+  width: 28px;
+  height: 28px;
+
+  border:  solid 4px transparent;
+  border-top-color:  #29d;
+  border-left-color: #29d;
+  border-radius: 50%;
+
+  -webkit-animation: loading-bar-spinner 400ms linear infinite;
+  -moz-animation:    loading-bar-spinner 400ms linear infinite;
+  -ms-animation:     loading-bar-spinner 400ms linear infinite;
+  -o-animation:      loading-bar-spinner 400ms linear infinite;
+  animation:         loading-bar-spinner 400ms linear infinite;
+}
+
+._scatter.dirty svg,  ._scatter.hover svg {
+  opacity: 0.5;
+}
+
+._scatter.hover {
+  outline: 2px dashed grey;
+}
+
+.drop-here {
+  position:absolute;
+  left:0;
+  margin-left:0;
+  top:0;
+  margin-top:0;
+  width:100%;
+  height:100%;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:30px;
+
+  visibility: hidden;
+}
+
+._scatter.hover .drop-here {
+  visibility: visible;
+}

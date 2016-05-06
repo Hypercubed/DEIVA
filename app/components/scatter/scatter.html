@@ -1,0 +1,165 @@
+<div id="view" ng-intro-options="main.introOptions" ng-intro-method="CallMe" ng-intro-autostart="false">
+
+  <section class="datapckage-editor-container hidden-print" style="position: relative">
+    <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+
+      <div id="data-download" class="btn-group" dropdown>
+        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" dropdown-toggle aria-expanded="false">
+          <div class="pull-right">
+            <i class="glyphicon glyphicon-download"></i>
+            Download Data <span class="caret"></span>
+          </div>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li class="dropdown-header">Data Resources</li>
+          <li ng-repeat="file in main.dataPackage.resources" ng-if="!file.hide">
+            <a class="btn btn-link" file-download="file">{{file.name}}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div id="svg-download" class="btn-group hidden-print" dropdown svg-download-dropdown="svgList in #charts">
+        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" dropdown-toggle aria-expanded="false">
+          <div class="pull-right">
+            <i class="glyphicon glyphicon-picture"></i>
+            Download SVG <span class="caret"></span>
+          </div>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li class="dropdown-header">Data Images</li>
+          <li ng-repeat="svg in svgList">
+            <a href svg-download="#{{svg.id}}" title="{{svg.title}}">{{svg.title}} as SVG</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="btn-group pull-right">
+        <button id="intro" type="button" class="btn btn-success btn-sm" ng-click="CallMe();">
+          Show me
+        </button>
+      </div>
+
+      <div class="btn-group pull-right">
+        <div file-dropzone="[text/plain,text/csv,text/tab-separated-values]" data-max-file-size="30" dropped="main.dropped(file)">
+          <button id="data-drop" type="button" class="btn btn-primary btn-sm">
+            Drop your own data here
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="charts" class="container-fluid">
+
+    <div class="col-md-3">
+      <div class="well chart-height">
+        <form>
+          <label>Dataset:</label>
+          <select id="data-set" class="form-control"
+            ng-options="option.name for option in main.dataPackage.resources[0].data track by option.filename"
+            ng-model="main.selectedData"
+            ng-change="main.loadDataset(main.selectedData)"></select>
+
+          <label>Locate symbol:</label>
+          <ui-select id="gene-select"
+              multiple theme="bootstrap" paste="main.pasteSymbols" tagging-tokens="SPACE|,|/"
+              ng-model="main.geneList" ng-change="main.update()">
+            <ui-select-no-choice>
+              We couldn't find any matches...
+            </ui-select-no-choice>
+            <ui-select-match placeholder="Select genes...">
+              {{$item.symbol}}
+              <span class="badge" ng-style="{ backgroundColor: main.colorScale($index) }">
+                <small>
+                  {{$item.count}}
+                </small>
+              </span>
+            </ui-select-match>
+            <ui-select-choices repeat="gene in main.uniqGeneList | filter: $select.search | limitTo: 100 track by gene.symbol"
+                refresh-delay="0"
+                ng-class="{ hide: $select.search.length < 1 }">
+                <span ng-bind-html="gene.symbol | highlight: $select.search"></span>
+                <span class="badge">
+                  <small>
+                    {{gene.count}}
+                  </small>
+                </span>
+            </ui-select-choices>
+          </ui-select>
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="btn-group btn-group-xs pull-right">
+                <button id="clipboard-btn" class="btn btn-sm btn-default" title="Copy list to clipboard" ng-disabled="main.geneList.length === 0">
+                  <i class="glyphicon glyphicon-paperclip"></i>
+                </button>
+                <button class="btn btn-sm btn-default" title="Clear" ng-click="main.geneList = []; main.update()" ng-disabled="main.geneList.length === 0">
+                  <i class="glyphicon glyphicon-remove"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="filters" class="row clear">
+            <div id="fc-filter" class="col-md-12 col-xs-6">
+              <label>abs. log2FoldChange &gt; </label>
+              <input type="number" class="form-control input-sm" ng-model="main.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
+              <rzslider rz-slider-model="main.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
+            </div>
+
+            <div id="fdr-filter" class="col-md-12 col-xs-6">
+              <label>AND FDR &lt; </label>
+              <input type="number" class="form-control input-sm" ng-model="main.logpcut" min="-5" max="0" step="0.1" ng-change="main.update()"/>
+              <rzslider rz-slider-model="main.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
+            </div>
+
+
+            <div id="fdr-filter" class="col-md-12">
+              <label>Up: {{main.upDown[0]}}</label>
+              <br /><label>Down: {{main.upDown[1]}}</label>
+            </div>
+          </div>
+
+          <p />
+          <div id="plot-type">
+            <input type="radio" name="hex" value="hex" checked ng-model="main.plot" ng-change="main.draw()"> Hexplot
+            <input type="radio" name="scatter" value="scatter" ng-model="main.plot" ng-change="main.draw()"> Scatterplot
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="col-md-9" on-resize="main.draw()">
+      <div class="well chart-height chart-well">
+        <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar" role="group" aria-label="toolbar">
+          <button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG">
+            <i class="glyphicon glyphicon-camera"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-default" ng-disabled="main.chart.brush.empty()" ng-click="main.chart.zoomExtent()" title="zoom to selection">
+            <i class="glyphicon glyphicon-zoom-in"></i>
+          </button>
+
+          <button type="button" class="btn btn-default" ng-click="main.chart.zoomOut(); main.updateList();" title="zoom out">
+            <i class="glyphicon glyphicon-zoom-out"></i>
+          </button>
+          <!-- button id="screenfull" type="button" class="btn btn-default" title="fullscreen">
+            <i class="glyphicon glyphicon-fullscreen"></i>
+          </button -->
+        </div>
+
+        <div id="_scatter__chart" class="_scatter" file-dropzone="[text/plain,text/csv,text/tab-separated-values]" data-max-file-size="30" dropped="main.dropped(file)">
+          <div class="spinner-icon"></div>
+          <div class="drop-here">
+            Drop File Here
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-12">
+      <h2>Expression <small>Showing {{main.gridOptions.data.length}} of {{main.dataState.data.length}}</small></h2>
+      <div ui-grid="main.gridOptions" ui-grid-exporter ui-grid-resize-columns class="expression-grid"></div>
+    </div>
+
+  </div>
+</div>

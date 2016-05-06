@@ -1,0 +1,10 @@
+node_modules
+.tmp
+.sass-cache
+.grunt
+.publish
+.settings
+.DS_Store
+.vscode
+app/data/*
+!app/data/.keep
