@@ -1,0 +1,19 @@
+{
+  "name": "deiva",
+  "version": "1.0.0-alpha",
+  "private": true,
+  "description": "Interactive Visual Analysis of differential gene expression test results",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hypercubed/DEIVA.git"
+  },
+  "author": "J. Harshbarger",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hypercubed/DEIVA/issues"
+  },
+  "homepage": "https://github.com/Hypercubed/DEIVA#readme"
+}
