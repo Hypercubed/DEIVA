@@ -12,7 +12,7 @@ export default function Scatter (opts = {}) {
   const margin = opts.margin || {top: 20, right: 20, bottom: 30, left: 40};
   let width = (opts.width || 1024) - margin.left - margin.right;
   const height = (opts.height || 500) - margin.top - margin.bottom;
-  const title = opts.title || 'Scatter';
+  const title = opts.title || 'DEIVA';
 
   let showScatter = false;
   let showDensity = true;
@@ -20,7 +20,7 @@ export default function Scatter (opts = {}) {
   const xTickFormat = d3.format('g');
   // const yTickFormat = d3.format('e');
 
-  const xValue = d => Number(d.baseMean) || 0.01; // data -> value
+  const xValue = d => (Number(d.baseMean) || 0.01); // data -> value
   const xScale = d3.scale.log().range([0, width]); // value -> display
   const xMap = d => xScale(xValue(d)); // data -> display
   const xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(d => {

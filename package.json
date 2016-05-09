@@ -1,5 +1,13 @@
 {
   "name": "deiva",
+  "jspm": {
+    "name": "deiva",
+    "dependencies": {},
+    "peerDependencies": {
+      "angular-intro.js": "npm:angular-intro.js@^2.0.1",
+      "intro.js": "npm:intro.js@^2.1.0"
+    }
+  },
   "version": "1.0.0-alpha",
   "private": true,
   "description": "Interactive Visual Analysis of differential gene expression test results",

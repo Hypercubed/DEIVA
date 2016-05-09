@@ -17,7 +17,7 @@ import angularSlider from 'angular-slider';
 import 'angular-slider/dist/rzslider.css!';
 import './scatter/slider.css!';
 
-import 'intro/introjs.css!';
+import 'intro.js/introjs.css!';
 import 'angular-intro.js';
 
 export default angular
