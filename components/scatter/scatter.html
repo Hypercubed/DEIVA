@@ -3,10 +3,10 @@
   <section class="datapckage-editor-container hidden-print" style="position: relative">
     <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
 
-      <div id="data-download" class="btn-group" dropdown>
-        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" dropdown-toggle aria-expanded="false">
+      <div id="data-download" class="btn-group" uib-dropdown>
+        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" uib-dropdown-toggle aria-expanded="false">
           <div class="pull-right">
-            <i class="glyphicon glyphicon-download"></i>
+            <i class="fa fa-download" aria-hidden="true"></i>
             Download Data <span class="caret"></span>
           </div>
         </button>
@@ -18,10 +18,10 @@
         </ul>
       </div>
 
-      <div id="svg-download" class="btn-group hidden-print" dropdown svg-download-dropdown="svgList in #charts">
-        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" dropdown-toggle aria-expanded="false">
+      <div id="svg-download" class="btn-group hidden-print" uib-dropdown svg-download-dropdown="svgList in #charts">
+        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" uib-dropdown-toggle aria-expanded="false">
           <div class="pull-right">
-            <i class="glyphicon glyphicon-picture"></i>
+            <i class="fa fa-picture-o" aria-hidden="true"></i>
             Download SVG <span class="caret"></span>
           </div>
         </button>
@@ -91,10 +91,10 @@
             <div class="col-xs-12">
               <div class="btn-group btn-group-xs pull-right">
                 <button id="clipboard-btn" class="btn btn-sm btn-default" title="Copy list to clipboard" ng-disabled="main.geneList.length === 0">
-                  <i class="glyphicon glyphicon-paperclip"></i>
+                  <i class="fa fa-paperclip" aria-hidden="true"></i>
                 </button>
                 <button class="btn btn-sm btn-default" title="Clear" ng-click="main.geneList = []; main.update()" ng-disabled="main.geneList.length === 0">
-                  <i class="glyphicon glyphicon-remove"></i>
+                  <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -102,13 +102,13 @@
 
           <div id="filters" class="row clear">
             <div id="fc-filter" class="col-md-12 col-xs-6">
-              <label>abs. log2FoldChange &gt; </label>
+              <label>abs. log2FoldChange &ge; </label>
               <input type="number" class="form-control input-sm" ng-model="main.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
               <rzslider rz-slider-model="main.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
             </div>
 
             <div id="fdr-filter" class="col-md-12 col-xs-6">
-              <label>AND FDR &lt; </label>
+              <label>AND FDR &le; </label>
               <input type="number" class="form-control input-sm" ng-model="main.logpcut" min="-5" max="0" step="0.1" ng-change="main.update()"/>
               <rzslider rz-slider-model="main.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
             </div>
@@ -133,17 +133,17 @@
       <div class="well chart-height chart-well">
         <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar" role="group" aria-label="toolbar">
           <button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG">
-            <i class="glyphicon glyphicon-camera"></i>
+            <i class="fa fa-camera" aria-hidden="true"></i>
           </button>
           <button type="button" class="btn btn-sm btn-default" ng-disabled="main.chart.brush.empty()" ng-click="main.chart.zoomExtent()" title="zoom to selection">
-            <i class="glyphicon glyphicon-zoom-in"></i>
+            <i class="fa fa-search-plus" aria-hidden="true"></i>
           </button>
 
           <button type="button" class="btn btn-default" ng-click="main.chart.zoomOut(); main.updateList();" title="zoom out">
-            <i class="glyphicon glyphicon-zoom-out"></i>
+            <i class="fa fa-home" aria-hidden="true"></i>
           </button>
           <!-- button id="screenfull" type="button" class="btn btn-default" title="fullscreen">
-            <i class="glyphicon glyphicon-fullscreen"></i>
+            <i class="fa fa-arrows-alt" aria-hidden="true"></i>
           </button -->
         </div>
 
