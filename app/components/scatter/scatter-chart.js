@@ -36,7 +36,7 @@ export default function Scatter (opts = {}) {
   const highlightColor = opts.highlightColor || d3.scale.category10();
 
   let highlightFilter = () => false;
-  let cutoffFilter = d => d.padj < 0.05;
+  let cutoffFilter = d => d.padj <= 0.05;
 
   const hsize = 4;
 

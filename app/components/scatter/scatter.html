@@ -102,13 +102,13 @@
 
           <div id="filters" class="row clear">
             <div id="fc-filter" class="col-md-12 col-xs-6">
-              <label>abs. log2FoldChange &gt; </label>
+              <label>abs. log2FoldChange &ge; </label>
               <input type="number" class="form-control input-sm" ng-model="main.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
               <rzslider rz-slider-model="main.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
             </div>
 
             <div id="fdr-filter" class="col-md-12 col-xs-6">
-              <label>AND FDR &lt; </label>
+              <label>AND FDR &le; </label>
               <input type="number" class="form-control input-sm" ng-model="main.logpcut" min="-5" max="0" step="0.1" ng-change="main.update()"/>
               <rzslider rz-slider-model="main.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
             </div>

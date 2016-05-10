@@ -217,7 +217,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
 
     const genesSearch = main.geneList.map(x => x.symbol.toUpperCase());
     const geneCheck = d => genesSearch.indexOf(d.symbol.toUpperCase());
-    const cutoffCheck = d => d.padj < Number(pcut) && Math.abs(d.log2FoldChange) > fccut;
+    const cutoffCheck = d => d.padj <= Number(pcut) && Math.abs(d.log2FoldChange) >= fccut;
 
     const d = dataState.data.filter(cutoffCheck);
 
