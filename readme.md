@@ -106,6 +106,8 @@ cd Project-Chi
 git checkout tags/v1.0.0-alpha.2  # ensure you are using the same version of Project χ
 npm install # jspm install is run post-install by npm
 git clone https://github.com/Hypercubed/DEIVA.git dataset/DEIVA
+svn checkout https://github.com/antonkratz/genome-research-edgeR-DESeq2/trunk/annotated
+mv annotated DEIVA/data
 gulp dev --dataset=./dataset/DEIVA/
 # navigate to http://localhost:9000
 ```
@@ -126,7 +128,7 @@ TBD
 
 ## Acknowledgments
 
-DEIVA visualization conceptualize and prototyped by Anton Kratz.
+DEIVA visualization conceptualized and prototyped by Anton Kratz.
 
 Project-χ implementation of DEIVA developed by Jayson  Harshbarger with inspiration from DESeq2IVA (Shiny version) and significant input from Anton Kratz.
 
