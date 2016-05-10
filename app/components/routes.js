@@ -13,8 +13,8 @@ import 'ui-grid/ui-grid.css!';
 import 'ui-select/dist/select';
 import 'ui-select/dist/select.css!';
 
-import angularSlider from 'angular-slider';
-import 'angular-slider/dist/rzslider.css!';
+import angularSlider from 'angularjs-slider';
+import 'angularjs-slider/dist/rzslider.css!';
 import './scatter/slider.css!';
 
 import 'intro.js/introjs.css!';
