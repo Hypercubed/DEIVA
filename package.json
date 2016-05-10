@@ -4,8 +4,15 @@
     "name": "deiva",
     "dependencies": {},
     "peerDependencies": {
+      "d3": "npm:d3@^3.5.16",
+      "d3-plugins": "github:d3/d3-plugins@master",
+      "d3-tip": "github:Caged/d3-tip@0.6.7",
       "angular-intro.js": "npm:angular-intro.js@^2.0.1",
-      "intro.js": "npm:intro.js@^2.1.0"
+      "angularjs-slider": "github:angular-slider/angularjs-slider@^2.11.0",
+      "fs": "github:jspm/nodelibs-fs@^0.2.0-alpha",
+      "intro.js": "npm:intro.js@^2.1.0",
+      "process": "github:jspm/nodelibs-process@^0.2.0-alpha",
+      "ui-select": "npm:ui-select@^0.16.1"
     }
   },
   "version": "1.0.0-alpha",
