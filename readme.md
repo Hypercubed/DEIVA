@@ -92,13 +92,11 @@ An alternative input format is also possible, this is especially useful when sta
 
 ## Pre-built
 
-DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch](https://github.com/Hypercubed/DEIVA/tree/gh-pages) of this project and replace the files in the `/data` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` and `index.tsv` files (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
+DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch](https://github.com/Hypercubed/DEIVA/tree/gh-pages) of this project and replace the files in the `app/data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` and `index.tsv` files (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
 
 ## Building from source
 
 DEIVA was developed using the [Project χ toolkit](https://github.com/Hypercubed/Project-chi).  If you are not familiar with Project-χ please see [here](https://github.com/Hypercubed/Project-chi#readme).  To utilize Project χ You should be familiar with [JSPM](http://jspm.io/), [SystemJS](https://github.com/systemjs/systemjs), and [Gulp](http://gulpjs.com/).
-
-## Quick Start
 
 ```sh
 git clone https://github.com/Hypercubed/Project-Chi.git
@@ -106,11 +104,24 @@ cd Project-Chi
 git checkout tags/v1.0.0-alpha.2  # ensure you are using the same version of Project χ
 npm install # jspm install is run post-install by npm
 git clone https://github.com/Hypercubed/DEIVA.git dataset/DEIVA
+```
+
+Now add your data to the `./dataset/DEIVA/app/data` directory (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).  Alternatively you may download data from [antonkratz/genome-research-edgeR-DESeq2](https://github.com/antonkratz/genome-research-edgeR-DESeq2):
+
+```sh
+svn checkout https://github.com/antonkratz/genome-research-edgeR-DESeq2/trunk/annotated
+mv annotated/* dataset/DEIVA/app/data/
+rm -rf annotated/
+```
+
+Start the development server:
+
+```sh
 gulp dev --dataset=./dataset/DEIVA/
 # navigate to http://localhost:9000
 ```
 
-Data goes in `./dataset/DEIVA/app/data` (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data))
+
 
 # About Project χ
 
@@ -126,7 +137,7 @@ TBD
 
 ## Acknowledgments
 
-DEIVA visualization conceptualize and prototyped by Anton Kratz.
+DEIVA visualization conceptualized and prototyped by Anton Kratz.
 
 Project-χ implementation of DEIVA developed by Jayson  Harshbarger with inspiration from DESeq2IVA (Shiny version) and significant input from Anton Kratz.
 
