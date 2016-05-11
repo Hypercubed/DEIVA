@@ -102,7 +102,7 @@
 
           <div id="filters" class="row clear">
             <div id="fc-filter" class="col-md-12 col-xs-6">
-              <label>abs. log2FoldChange &ge; </label>
+              <label>abs. log2FoldChange &gt; </label>
               <input type="number" class="form-control input-sm" ng-model="main.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
               <rzslider rz-slider-model="main.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
             </div>

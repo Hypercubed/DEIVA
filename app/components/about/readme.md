@@ -102,7 +102,7 @@ TBD
 
 ## Acknowledgments
 
-DEIVA visualization conceptualize and prototyped by Anton Kratz.
+DEIVA visualization conceptualized and prototyped by Anton Kratz.
 
 Project-χ implementation of DEIVA developed by Jayson  Harshbarger with inspiration from DESeq2IVA (Shiny version) and significant input from Anton Kratz.
 
