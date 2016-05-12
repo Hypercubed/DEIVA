@@ -188,7 +188,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     resource.name = set.name;
 
     dataService.reloadResource(resource).then(() => {
-      main.gene = set.gene;
+      main.gene = set.gene || set.symbols || '';
       // main.geneList = set.gene.split(' ');
       main.change();
     });
