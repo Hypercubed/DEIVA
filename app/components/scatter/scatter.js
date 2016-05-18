@@ -275,13 +275,21 @@ function controller ($scope, dataService, $log, $timeout, growl) {
 
     main.gridOptions.data = dataState.data;
 
-    const fullGeneList = dataState.data
-      .map(x => x.symbols)
-      .reduce(function(a, b) {  // flat map
-        return a.concat(b);
-      })
-      .filter(x => x !== 'n/a')
+    $log.info('getting unique symbols');
+
+    const fullGeneList = [];
+
+    data
+      .forEach(x => {
+        x.symbols.forEach(s => {
+          fullGeneList.push(s);
+        });
+      });
+
+    fullGeneList
       .sort();
+
+    $log.info('done getting unique symbols', fullGeneList.length);
 
     const uniqGeneMap = {};
     const uniqGeneList = [];
