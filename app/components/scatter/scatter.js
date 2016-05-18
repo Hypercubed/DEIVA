@@ -215,8 +215,17 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     const pcut = Math.pow(10, Number(main.logpcut));
     const fccut = main.fccut;
 
-    const genesSearch = main.geneList.map(x => x.symbol.toUpperCase());
-    const geneCheck = d => genesSearch.indexOf(d.symbol.toUpperCase());
+    const genesSearch = main.geneList.map(x => x.symbol);
+
+    const geneCheck = function (d) {
+      for (var i = 0; i < d.symbols.length; i++) {
+        var j = genesSearch.indexOf(d.symbols[i]);
+        if (j > -1) {
+          return j;
+        }
+      }
+      return -1;
+    }
     const cutoffCheck = d => d.padj <= Number(pcut) && Math.abs(d.log2FoldChange) > fccut;
 
     const d = dataState.data.filter(cutoffCheck);
@@ -240,9 +249,14 @@ function controller ($scope, dataService, $log, $timeout, growl) {
       d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
       d.baseMean = Number(d.baseMean) || Number(d.logCPM) || 0.001;  // Base Mean
       d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
+      d.symbols = d.symbol.split(';');
       d.symbol = d.symbol || d.feature;
       return d.baseMean > 0.001;
     });
+
+    /* data.filter(d => d.symbol.indexOf(';') > -1).forEach(function(d) {
+      console.log(d.symbol);
+    }); */
 
     if (data.length < 1) {
       growl.error(`Failed to find any features in ${resource.name}`);
@@ -262,7 +276,10 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     main.gridOptions.data = dataState.data;
 
     const fullGeneList = dataState.data
-      .map(x => x.symbol)
+      .map(x => x.symbols)
+      .reduce(function(a, b) {  // flat map
+        return a.concat(b);
+      })
       .filter(x => x !== 'n/a')
       .sort();
 

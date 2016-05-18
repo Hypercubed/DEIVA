@@ -54,7 +54,7 @@ The header *does* contain an entry for the first column! In a not typical for DE
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
-The DESeq2 output is augmented by one column: symbol. This contains a gene symbol associated with the feature (cluster, transcription initiation site) of interest. This column is searched for when locating genes. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
+The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
 
 Example for a DEIVA input file:
 
@@ -67,6 +67,8 @@ Example for a DEIVA input file:
 **The symbol column is optional.**
 
 **Columns may appear in any order.**
+
+**Multiple symbols in the symbol must b separated by semicolons**
 
 ### edgeR flavor
 
@@ -120,8 +122,6 @@ Start the development server:
 gulp dev --dataset=./dataset/DEIVA/
 # navigate to http://localhost:9000
 ```
-
-
 
 # About Project χ
 
