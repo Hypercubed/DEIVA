@@ -54,7 +54,7 @@ The header *does* contain an entry for the first column! In a not typical for DE
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
-The DESeq2 output is augmented by one column: symbol. This contains a gene symbol associated with the feature (cluster, transcription initiation site) of interest. This column is searched for when locating genes. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
+The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
 
 Example for a DEIVA input file:
 
@@ -67,6 +67,8 @@ Example for a DEIVA input file:
 **The symbol column is optional.**
 
 **Columns may appear in any order.**
+
+**Multiple symbols in the symbol must b separated by semicolons**
 
 ### edgeR flavor
 
@@ -84,9 +86,9 @@ An alternative input format is also possible, this is especially useful when sta
 
 | feature |logFC   |logCPM  |LR      |PValue  |FDR     |symbol|
 |---	|---	|---		|---			|---		|---			|--- |
-| chr10_100486611_100486680_+     |-0.792817368178757      |6.15713415308089        |5.89498642469805        |0.0151840465950009      |0.0413077938423281      |Kcnj16|
-| chr10_102389850_102389932_+     |0.971318236831185       |3.51479142943153        |2.31041232774695        |0.128509956456949       |0.233565642765819       |NA|
-| chr10_102393454_102393460_+     |1.21869694330981        |3.74540666988435        |5.39366227820117        |0.020210011581406       |0.0523206275040398      |NA|
+| chr10\_100486611\_100486680\_+     |-0.792817368178757      |6.15713415308089        |5.89498642469805        |0.0151840465950009      |0.0413077938423281      |Kcnj16|
+| chr10\_102389850\_102389932\_+     |0.971318236831185       |3.51479142943153        |2.31041232774695        |0.128509956456949       |0.233565642765819       |NA|
+| chr10\_102393454\_102393460\_+     |1.21869694330981        |3.74540666988435        |5.39366227820117        |0.020210011581406       |0.0523206275040398      |NA|
 
 # About Project χ
 
