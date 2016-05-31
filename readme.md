@@ -12,7 +12,7 @@ While this could also be achieved using any spreadsheet program like Excel, LO C
 
 DEIVA provides an interface where domain experts simply go to a URL and can immediately search for genes, retrieve genes, and filter results lists.
 
-DEIVA visualization conceptualize and prototyped by Anton Kratz.
+DEIVA visualization conceptualized and prototyped by Anton Kratz.
 
 Project-χ implementation of DEIVA developed by Jayson Harshbarger with inspiration from DESeq2IVA (Shiny version) and significant input from Anton Kratz.
 
@@ -50,7 +50,7 @@ The input file needs to have the following columns:
 * pvalue
 * padj
 
-The header *does* contain an entry for the first column! In a not typical for DESeq2 analysis but required in this application.
+The header *does* contain an entry for the first column! Typically, when wrinting a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
@@ -89,6 +89,12 @@ An alternative input format is also possible, this is especially useful when sta
 | chr10\_100486611\_100486680\_+     |-0.792817368178757      |6.15713415308089        |5.89498642469805        |0.0151840465950009      |0.0413077938423281      |Kcnj16|
 | chr10\_102389850\_102389932\_+     |0.971318236831185       |3.51479142943153        |2.31041232774695        |0.128509956456949       |0.233565642765819       |NA|
 | chr10\_102393454\_102393460\_+     |1.21869694330981        |3.74540666988435        |5.39366227820117        |0.020210011581406       |0.0523206275040398      |NA|
+
+### Detailed example on generating DESeq2 and edgeR-based input files
+
+See this git repository, reproducibe and documented, describing how the example inut files for DEIVA have been generated:
+
+https://github.com/antonkratz/genome-research-edgeR-DESeq2.git
 
 # Deploying DEIVA with your own data
 
