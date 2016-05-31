@@ -92,7 +92,7 @@ An alternative input format is also possible, this is especially useful when sta
 
 ### Detailed example on generating DESeq2 and edgeR-based input files
 
-See this git repository, reproducibe and documented, describing how the example inut files for DEIVA have been generated:
+See this git repository, describing how the example input files for DEIVA have been generated:
 
 https://github.com/antonkratz/genome-research-edgeR-DESeq2.git
 
