@@ -12,10 +12,6 @@ While this could also be achieved using any spreadsheet program like Excel, LO C
 
 DEIVA provides an interface where domain experts simply go to a URL and can immediately search for genes, retrieve genes, and filter results lists.
 
-DEIVA visualization conceptualize and prototyped by Anton Kratz.
-
-Project-χ implementation of DEIVA developed by Jayson Harshbarger with inspiration from DESeq2IVA (Shiny version) and significant input from Anton Kratz.
-
 ## Features
 
 * **Select** an experiment from a drop-down list of datasets results.
@@ -50,11 +46,11 @@ The input file needs to have the following columns:
 * pvalue
 * padj
 
-The header *does* contain an entry for the first column! In a not typical for DESeq2 analysis but required in this application.
+The header *does* contain an entry for the first column! Typically, when wrinting a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
-The DESeq2 output is augmented by one column: symbol. This contains a gene symbol associated with the feature (cluster, transcription initiation site) of interest. This column is searched for when locating genes. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
+The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
 
 Example for a DEIVA input file:
 
@@ -67,6 +63,8 @@ Example for a DEIVA input file:
 **The symbol column is optional.**
 
 **Columns may appear in any order.**
+
+**Multiple symbols in the symbol must b separated by semicolons**
 
 ### edgeR flavor
 
@@ -84,9 +82,48 @@ An alternative input format is also possible, this is especially useful when sta
 
 | feature |logFC   |logCPM  |LR      |PValue  |FDR     |symbol|
 |---	|---	|---		|---			|---		|---			|--- |
-| chr10_100486611_100486680_+     |-0.792817368178757      |6.15713415308089        |5.89498642469805        |0.0151840465950009      |0.0413077938423281      |Kcnj16|
-| chr10_102389850_102389932_+     |0.971318236831185       |3.51479142943153        |2.31041232774695        |0.128509956456949       |0.233565642765819       |NA|
-| chr10_102393454_102393460_+     |1.21869694330981        |3.74540666988435        |5.39366227820117        |0.020210011581406       |0.0523206275040398      |NA|
+| chr10\_100486611\_100486680\_+     |-0.792817368178757      |6.15713415308089        |5.89498642469805        |0.0151840465950009      |0.0413077938423281      |Kcnj16|
+| chr10\_102389850\_102389932\_+     |0.971318236831185       |3.51479142943153        |2.31041232774695        |0.128509956456949       |0.233565642765819       |NA|
+| chr10\_102393454\_102393460\_+     |1.21869694330981        |3.74540666988435        |5.39366227820117        |0.020210011581406       |0.0523206275040398      |NA|
+
+### Detailed example on generating DESeq2 and edgeR-based input files
+
+See this git repository, describing how the example input files for DEIVA have been generated:
+
+https://github.com/antonkratz/genome-research-edgeR-DESeq2.git
+
+# Deploying DEIVA with your own data
+
+## Pre-built
+
+DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch](https://github.com/Hypercubed/DEIVA/tree/gh-pages) of this project and replace the files in the `app/data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` and `index.tsv` files (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
+
+## Building from source
+
+DEIVA was developed using the [Project χ toolkit](https://github.com/Hypercubed/Project-chi).  If you are not familiar with Project-χ please see [here](https://github.com/Hypercubed/Project-chi#readme).  To utilize Project χ You should be familiar with [JSPM](http://jspm.io/), [SystemJS](https://github.com/systemjs/systemjs), and [Gulp](http://gulpjs.com/).
+
+```sh
+git clone https://github.com/Hypercubed/Project-Chi.git
+cd Project-Chi
+git checkout tags/v1.0.0-alpha.3  # ensure you are using the same version of Project χ
+npm install # jspm install is run post-install by npm
+git clone https://github.com/Hypercubed/DEIVA.git dataset/DEIVA
+```
+
+Now add your data to the `./dataset/DEIVA/app/data` directory (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).  Alternatively you may download data from [antonkratz/genome-research-edgeR-DESeq2](https://github.com/antonkratz/genome-research-edgeR-DESeq2):
+
+```sh
+svn checkout https://github.com/antonkratz/genome-research-edgeR-DESeq2/trunk/annotated
+mv annotated/* dataset/DEIVA/app/data/
+rm -rf annotated/
+```
+
+Start the development server:
+
+```sh
+gulp dev --dataset=./dataset/DEIVA/
+# navigate to http://localhost:9000
+```
 
 # About Project χ
 
