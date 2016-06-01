@@ -90,7 +90,7 @@ An alternative input format is also possible, this is especially useful when sta
 
 See this git repository, describing how the example input files for DEIVA have been generated:
 
-https://github.com/antonkratz/genome-research-edgeR-DESeq2.git
+[antonkratz/genome-research-edgeR-DESeq2](https://github.com/antonkratz/genome-research-edgeR-DESeq2.git)
 
 # Deploying DEIVA with your own data
 
@@ -105,7 +105,7 @@ DEIVA was developed using the [Project χ toolkit](https://github.com/Hypercubed
 ```sh
 git clone https://github.com/Hypercubed/Project-Chi.git
 cd Project-Chi
-git checkout tags/v1.0.0-alpha.3  # ensure you are using the same version of Project χ
+git checkout tags/v1.0.0-beta  # ensure you are using the same version of Project χ
 npm install # jspm install is run post-install by npm
 git clone https://github.com/Hypercubed/DEIVA.git dataset/DEIVA
 ```
