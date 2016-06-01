@@ -30,5 +30,19 @@
   "bugs": {
     "url": "https://github.com/Hypercubed/DEIVA/issues"
   },
-  "homepage": "https://github.com/Hypercubed/DEIVA#readme"
+  "homepage": "https://github.com/Hypercubed/DEIVA#readme",
+  "devDependencies": {
+    "xo": "^0.15.1"
+  },
+  "xo": {
+    "esnext": true,
+    "space": 2,
+    "envs": [
+      "browser"
+    ],
+    "ignores": [
+      "app/data/**",
+      "gulp/*.js"
+    ]
+  }
 }

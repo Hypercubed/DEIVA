@@ -14,7 +14,7 @@ import template from './scatter.html!text';
 import ScatterChart from './scatter-chart';
 
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
-function controller ($scope, dataService, $log, $timeout, growl) {
+function controller($scope, dataService, $log, $timeout, growl) {
   const main = this;
 
   // grid
@@ -165,7 +165,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
 
   return;
 
-  function loadDataset (set) {
+  function loadDataset(set) {
     const resource = main.dataPackage.resources[1];
     resource.url = `./data/${set.filename}`;
     resource.name = set.name;
@@ -176,7 +176,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     });
   }
 
-  function updateList () {
+  function updateList() {
     if (chart.brush.empty()) {
       // console.log('clear');
       dataState.byBaseMean.filterRange([0.01, Infinity]);
@@ -193,7 +193,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     }
   }
 
-  function setup () {
+  function setup() {
     const pcut = Math.pow(10, Number(main.logpcut));
     const fccut = main.fccut;
 
@@ -224,14 +224,14 @@ function controller ($scope, dataService, $log, $timeout, growl) {
       .cutoffFilter(cutoffCheck);
   }
 
-  function update () {
+  function update() {
     $log.debug('update');
     $chart.classed('dirty', true);
     setup();
     _update();
   }
 
-  function change () {
+  function change() {
     $log.debug('change');
     $chart.classed('dirty', true);
     $timeout(() => {
@@ -241,7 +241,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     });
   }
 
-  function draw () {
+  function draw() {
     $log.debug('draw');
 
     $chart.classed('dirty', true);
@@ -250,7 +250,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     _draw();
   }
 
-  function processData () {
+  function processData() {
     const resource = main.dataPackage.resources[1];
 
     const data = resource.data.filter(d => {
@@ -323,7 +323,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     addSymbols(main.gene);
   }
 
-  function addSymbols (list) {
+  function addSymbols(list) {
     list.split(' ').forEach(symbol => {
       const item = main.uniqGeneMap[symbol];
       if (item && !main.geneList.includes(item)) {
@@ -332,7 +332,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     });
   }
 
-  function dropped (file) {
+  function dropped(file) {
     $chart.classed('dirty', true);
 
     let mediatype = mime.lookup(file.name);

@@ -8,7 +8,7 @@ import 'd3-tip/examples/example-styles.css!';
 import {moveToFront} from './utils';
 import './scatter.css!';
 
-export default function Scatter (opts = {}) {
+export default function Scatter(opts = {}) {
   const margin = opts.margin || {top: 20, right: 20, bottom: 30, left: 40};
   let width = (opts.width || 1024) - margin.left - margin.right;
   const height = (opts.height || 500) - margin.top - margin.bottom;
@@ -74,7 +74,7 @@ export default function Scatter (opts = {}) {
     .y(yScale)
     .scaleExtent([1, 10]);
 
-  function scatter (selection) {
+  function scatter(selection) {
     selection.each(function (d) {
       const el = d3.select(this);
 
@@ -97,7 +97,7 @@ export default function Scatter (opts = {}) {
         .y(yScale)
         .on('zoom', zoomed);
 
-      function panLimit () {
+      function panLimit() {
         // let tx = zoom.translate()[0];
         // let ty = zoom.translate()[1];
         const xmin = xExtent[0];
@@ -181,13 +181,13 @@ export default function Scatter (opts = {}) {
         zoomed();
       });
 
-      function zoomOut () {
+      function zoomOut() {
         xScale.domain(xExtent);
         yScale.domain(yExtent);
         zoomed();
       }
 
-      function zoomToExtent () {
+      function zoomToExtent() {
         if (brush.empty()) {
           return;
         }
@@ -201,14 +201,14 @@ export default function Scatter (opts = {}) {
         xScale.domain([x0, x1]);
         yScale.domain([y0, y1]);
 
-        svg.selectAll(".brush").call(brush.clear());
+        svg.selectAll('.brush').call(brush.clear());
 
         //  zoom.translate([x0, y0]);
         //  zoom.scale([x1 - x0, y1 - y0]);
         zoomed();
       }
 
-      function zoomed () {
+      function zoomed() {
         panLimit();
 
         container.select('g.x.axis').call(xAxis);
@@ -236,7 +236,7 @@ export default function Scatter (opts = {}) {
       scatter.zoomExtent = zoomToExtent;
       scatter.zoomOut = zoomOut;
 
-      function updateDensity () {
+      function updateDensity() {
         const hexPath = hexbin
           .x(xMap)   // maps change on zoom, need to rebin
           .y(yMap)
@@ -263,12 +263,12 @@ export default function Scatter (opts = {}) {
         hexagon.exit().remove();
       }
 
-      function zoomPoints () {
+      function zoomPoints() {
         pointsG.selectAll('.point')
           .attr('transform', d => `translate(${xMap(d)},${yMap(d)})`);
       }
 
-      function updatePoints () {
+      function updatePoints() {
         const dd = d.filter(d => {
           d.highlight = highlightFilter(d);
           return showScatter || d.highlight > -1;

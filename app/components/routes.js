@@ -1,7 +1,5 @@
 import angular from 'angular';
 
-import component from './scatter/scatter';
-
 import aboutHTML from 'components/about/readme.md!';
 import 'components/about/about.css!';
 
@@ -19,6 +17,8 @@ import './scatter/slider.css!';
 
 import 'intro.js/introjs.css!';
 import 'angular-intro.js';
+
+import component from './scatter/scatter';
 
 export default angular
   .module('routes', [
