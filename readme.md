@@ -90,7 +90,7 @@ An alternative input format is also possible, this is especially useful when sta
 
 See this git repository, describing how the example input files for DEIVA have been generated:
 
-https://github.com/antonkratz/genome-research-edgeR-DESeq2.git
+[antonkratz/genome-research-edgeR-DESeq2](https://github.com/antonkratz/genome-research-edgeR-DESeq2.git)
 
 # Deploying DEIVA with your own data
 
