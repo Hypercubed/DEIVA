@@ -12,10 +12,6 @@ While this could also be achieved using any spreadsheet program like Excel, LO C
 
 DEIVA provides an interface where domain experts simply go to a URL and can immediately search for genes, retrieve genes, and filter results lists.
 
-DEIVA visualization conceptualize and prototyped by Anton Kratz.
-
-Project-χ implementation of DEIVA developed by Jayson Harshbarger with inspiration from DESeq2IVA (Shiny version) and significant input from Anton Kratz.
-
 ## Features
 
 * **Select** an experiment from a drop-down list of datasets results.

@@ -15,8 +15,9 @@ import ScatterChart from './scatter-chart';
 
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
 function controller ($scope, dataService, $log, $timeout, growl) {
-  const colorScale = d3.scale.category10();
+  const main = this;
 
+  // grid
   const gridOptions = {
     columnDefs: [
       {name: 'feature'},
@@ -45,9 +46,9 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     exporterMenuAllData: false
   };
 
-  const main = this;
-
+  // chart
   const $chart = d3.select('#_scatter__chart');
+  const colorScale = d3.scale.category10();
 
   const chart = new ScatterChart({
     width: parseInt($chart.style('width'), 10),
@@ -56,16 +57,96 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     highlightColor: colorScale
   });
 
-  /* const elem = document.getElementById('_scatter__chart');
+  chart.brush.on('brushend.select', () => {
+    $scope.$apply(() => {
+      updateList();
+    });
+  });
 
-  document.getElementById('screenfull').addEventListener('click', () => {
-    if (screenfull.enabled) {
-      screenfull.request(elem);
-    }
-  }); */
-
+  // data
   const dataState = {};
 
+  // clipboard
+  const clipboard = new Clipboard('#clipboard-btn', {
+    text: () => main.geneList.map(x => x.symbol).join(' ')
+  });
+
+  clipboard.on('error', () => {
+    prompt('This browser does not suppport copying directly to clipboard.  Copy this text instead.', main.geneList.map(x => x.symbol).join(' ')); // eslint-disable-line no-alert
+  });
+
+  // setup intro
+  const introOptions = {
+    steps: [
+      {
+        element: '#charts',
+        intro: aboutHTML,
+        position: 'floating'
+      },
+      ...introData
+    ],
+    showStepNumbers: false,
+    exitOnOverlayClick: true,
+    exitOnEsc: true
+  };
+
+  Object.assign(main, {
+    editorOptions: {
+      data: main.dataPackage,
+      enableOpen: false
+    },
+    gene: main.dataPackage.resources[0].data[0].gene,
+    geneList: [],
+    pcut: 0.1,
+    fccut: 0,
+    logpcut: -1,
+    plot: 'hex',
+    selectedData: main.dataPackage.resources[0].data[0],
+    upDown: [0, 0],
+    colorScale,
+    dataState,
+    introOptions,
+    dropped,
+    gridOptions,
+    draw,
+    update,
+    change,
+    loadDataset,
+    pasteSymbols: list => {
+      addSymbols(list);
+      update();
+    },
+    chart,
+    $chart,
+    updateList,
+    fcCutSlider: {
+      floor: 0,
+      ceil: 5,
+      step: 1,
+      showTicksValues: true,
+      showTicks: true,
+      onEnd: main.update,
+      enforceStep: false
+    },
+    fdrCutSlider: {
+      floor: -5,
+      ceil: 0,
+      step: 1,
+      showTicksValues: true,
+      showTicks: true,
+      enforceStep: false,
+      onEnd: () => {
+        main.pcut = Math.pow(10, Number(main.logpcut));
+        update();
+      },
+      translate: value => `1e${value}`
+    },
+    $onInit: () => {
+      loadDataset(main.dataPackage.resources[0].data[0]);
+    }
+  });
+
+  // debounced functions
   const _draw = _.debounce(() => {
     $chart.selectAll('svg').remove();
 
@@ -82,105 +163,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     $chart.classed('dirty', false);
   }, 100);
 
-  Object.assign(main, {
-    gene: main.dataPackage.resources[0].data[0].gene,
-    geneList: [],
-    pcut: 0.1,
-    fccut: 0,
-    logpcut: -1,
-    plot: 'hex',
-    selectedData: main.dataPackage.resources[0].data[0],
-    upDown: [0, 0],
-    colorScale,
-    dataState,
-    introOptions: {
-      steps: [
-        {
-          element: "#charts",
-          intro: aboutHTML,
-          position: "floating"
-        },
-        ...introData
-      ],
-      showStepNumbers: false,
-      exitOnOverlayClick: true,
-      exitOnEsc: true
-    },
-    dropped,
-    gridOptions,
-    draw: () => {
-      $log.debug('draw');
-
-      $chart.classed('dirty', true);
-
-      setup();
-      _draw();
-    },
-    update: () => {
-      $log.debug('update');
-      $chart.classed('dirty', true);
-      setup();
-      _update();
-    },
-    change: () => {
-      $log.debug('change');
-      $chart.classed('dirty', true);
-      $timeout(() => {
-        processData();
-        setup();
-        main.draw();
-      });
-    },
-    loadDataset,
-    pasteSymbols: list => {
-      addSymbols(list);
-      main.update();
-    },
-    chart,
-    $chart,
-    updateList,
-    $onInit: () => {
-      main.loadDataset(main.dataPackage.resources[0].data[0]);
-    }
-  });
-
-  const clipboard = new Clipboard('#clipboard-btn', {
-    text: () => main.geneList.map(x => x.symbol).join(' ')
-  });
-
-  clipboard.on('error', () => {
-    prompt('This browser does not suppport copying directly to clipboard.  Copy this text instead.', main.geneList.map(x => x.symbol).join(' ')); // eslint-disable-line no-alert
-  });
-
-  main.fcCutSlider = {
-    floor: 0,
-    ceil: 5,
-    step: 1,
-    showTicksValues: true,
-    showTicks: true,
-    onEnd: main.update,
-    enforceStep: false
-  };
-
-  main.fdrCutSlider = {
-    floor: -5,
-    ceil: 0,
-    step: 1,
-    showTicksValues: true,
-    showTicks: true,
-    enforceStep: false,
-    onEnd: () => {
-      main.pcut = Math.pow(10, Number(main.logpcut));
-      main.update();
-    },
-    translate: value => `1e${value}`
-  };
-
-  chart.brush.on('brushend.select', () => {
-    $scope.$apply(() => {
-      updateList();
-    });
-  });
+  return;
 
   function loadDataset (set) {
     const resource = main.dataPackage.resources[1];
@@ -189,7 +172,6 @@ function controller ($scope, dataService, $log, $timeout, growl) {
 
     dataService.reloadResource(resource).then(() => {
       main.gene = set.gene || set.symbols || '';
-      // main.geneList = set.gene.split(' ');
       main.change();
     });
   }
@@ -218,14 +200,15 @@ function controller ($scope, dataService, $log, $timeout, growl) {
     const genesSearch = main.geneList.map(x => x.symbol);
 
     const geneCheck = function (d) {
-      for (var i = 0; i < d.symbols.length; i++) {
-        var j = genesSearch.indexOf(d.symbols[i]);
+      for (let i = 0; i < d.symbols.length; i++) {
+        const j = genesSearch.indexOf(d.symbols[i]);
         if (j > -1) {
           return j;
         }
       }
       return -1;
-    }
+    };
+
     const cutoffCheck = d => d.padj <= Number(pcut) && Math.abs(d.log2FoldChange) > fccut;
 
     const d = dataState.data.filter(cutoffCheck);
@@ -239,6 +222,32 @@ function controller ($scope, dataService, $log, $timeout, growl) {
       .highlightFilter(geneCheck)
       .width(parseInt($chart.style('width'), 10))
       .cutoffFilter(cutoffCheck);
+  }
+
+  function update () {
+    $log.debug('update');
+    $chart.classed('dirty', true);
+    setup();
+    _update();
+  }
+
+  function change () {
+    $log.debug('change');
+    $chart.classed('dirty', true);
+    $timeout(() => {
+      processData();
+      setup();
+      draw();
+    });
+  }
+
+  function draw () {
+    $log.debug('draw');
+
+    $chart.classed('dirty', true);
+
+    setup();
+    _draw();
   }
 
   function processData () {
@@ -263,6 +272,7 @@ function controller ($scope, dataService, $log, $timeout, growl) {
       return;
     }
 
+    // new data, new cross filter
     const cf = crossfilter(data);
 
     dataState.byBaseMean = cf.dimension(d => d.baseMean)
