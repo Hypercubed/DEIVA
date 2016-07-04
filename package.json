@@ -15,7 +15,7 @@
       "ui-select": "npm:ui-select@^0.16.1"
     }
   },
-  "version": "1.0.0-beta",
+  "version": "1.0.0-beta.2",
   "private": true,
   "description": "Interactive Visual Analysis of differential gene expression test results",
   "scripts": {
