@@ -5,14 +5,15 @@ import 'd3-plugins/hexbin/hexbin';
 import d3Tip from 'd3-tip';
 import 'd3-tip/examples/example-styles.css!';
 
-import {moveToFront} from './utils';
-import './scatter.css!';
+import {moveToFront} from './chart.utils';
+import './scatter-chart.css!';
 
 export default function Scatter(opts = {}) {
   const margin = opts.margin || {top: 20, right: 20, bottom: 30, left: 40};
   let width = (opts.width || 1024) - margin.left - margin.right;
   const height = (opts.height || 500) - margin.top - margin.bottom;
   const title = opts.title || 'DEIVA';
+  let alpha = 0.1;
 
   let showScatter = false;
   let showDensity = true;
@@ -49,8 +50,8 @@ export default function Scatter(opts = {}) {
     .interpolate(d3.interpolateLab);
 
   const hexOpacity = d3.scale.linear()
-    .domain([1, 10])  // fraction above cutoff
-    .range([0.1, 0.75])
+    .domain([0, 10])  // fraction above cutoff
+    .range([0, 1])
     .clamp(true);
 
   const brush = scatter.brush = d3.svg.brush()
@@ -165,7 +166,8 @@ export default function Scatter(opts = {}) {
         .text('log2FoldChange');
 
       const hexagonG = clipped.append('g')
-        .attr('class', 'hexagons');
+        .attr('class', 'hexagons')
+        .style('opacity', alpha);
 
       clipped.append('g')
         .attr('class', 'brush')
@@ -269,6 +271,8 @@ export default function Scatter(opts = {}) {
       }
 
       function updatePoints() {
+        hexagonG.style('opacity', alpha);
+
         const dd = d.filter(d => {
           d.highlight = highlightFilter(d);
           return showScatter || d.highlight > -1;
@@ -302,7 +306,7 @@ export default function Scatter(opts = {}) {
               moveToFront.call(this);
             } else {
               e
-                .style('opacity', 0.3)
+                .style('opacity', alpha)
                 .attr('r', 2)
                 .style('fill', cutoffFilter(d) ? 'red' : 'black');
             }
@@ -355,6 +359,14 @@ export default function Scatter(opts = {}) {
       return width;
     }
     width = (_ || 1024) - margin.left - margin.right;
+    return scatter;
+  };
+
+  scatter.alpha = function (_) {
+    if (arguments.length < 1) {
+      return alpha;
+    }
+    alpha = _;
     return scatter;
   };
 

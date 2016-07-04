@@ -1,8 +1,5 @@
 import angular from 'angular';
 
-import aboutHTML from 'components/about/readme.md!';
-import 'components/about/about.css!';
-
 import errorHTML from 'components/error/error.html!text';
 
 import 'ui-grid';
@@ -18,25 +15,14 @@ import './scatter/slider.css!';
 import 'intro.js/introjs.css!';
 import 'angular-intro.js';
 
-import component from './scatter/scatter';
+import scatterComponent from './scatter/scatter.component';
+import aboutComponent from './about/about.component';
 
-export default angular
-  .module('routes', [
-    'projectX.dataService',
-    'projectX.dataEditor',
-    'ui.grid',
-    'ui.grid.exporter',
-    'ui.grid.resizeColumns',
-    'ui.select',
-    'angular-loading-bar',
-    'angular-intro',
-    'svgDownloadDropdown',
-    angularSlider.name])
-  .component('scatter', component)
-  .config(['$routeProvider', $routeProvider => {
-    $routeProvider
+configRoute.$inject = ['$routeProvider'];
+function configRoute($routeProvider) {
+  $routeProvider
     .when('/about', {
-      template: `<div class="markdown-body">${aboutHTML}</div>`
+      template: '<about></about>'
     })
     .when('/error', {
       template: errorHTML
@@ -49,4 +35,19 @@ export default angular
       datapackageUrl: 'data/datapackage.json'
     })
     .otherwise({redirectTo: '/'});
-  }]);
+}
+
+const routes = angular
+  .module('routes', [
+    'ui.grid',
+    'ui.grid.exporter',
+    'ui.grid.resizeColumns',
+    'ui.select',
+    'angular-intro',
+    angularSlider.name])
+  .component('scatter', scatterComponent)
+  .component('about', aboutComponent)
+  .config(configRoute)
+  .name;
+
+export default routes;

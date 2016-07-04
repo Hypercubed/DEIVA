@@ -1,15 +1,13 @@
-import mime from 'common/services/datapackage/mime';
-// import screenfull from 'screenfull';
-
 import d3 from 'd3';
 
 import crossfilter from 'crossfilter';
 import _ from 'lodash';
 import Clipboard from 'clipboard';
 
+import mime from 'common/services/datapackage/mime';
+
 import introData from './intro.json!';
 import aboutHTML from './intro.md!';
-import template from './scatter.html!text';
 
 import ScatterChart from './scatter-chart';
 
@@ -17,16 +15,32 @@ controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
 function controller($scope, dataService, $log, $timeout, growl) {
   const main = this;
 
+  const cellTemplate = `
+  <div class="ui-grid-cell-contents">
+    <span ng-switch="COL_FIELD">
+      <span ng-switch-when="NA">
+        {{COL_FIELD}}
+      </span>
+      <span ng-switch-default>
+        <a href ng-click="grid.appScope.main.pasteSymbols(COL_FIELD)">
+          {{COL_FIELD}}
+        </a>
+      </span>
+    </span>
+  </div>`;
+
   // grid
+  const columnDefs = [
+    {name: 'feature'},
+    {name: 'symbol', cellTemplate},
+    {name: 'baseMean', displayName: 'Base Mean', type: 'number', cellFilter: 'number', enableFiltering: false},
+    {name: 'log2FoldChange', displayName: 'Log2 Fold Change', type: 'number', cellFilter: 'number', enableFiltering: false},
+    {name: 'pvalue', displayName: 'P-Value', type: 'number', cellFilter: 'number', enableFiltering: false},
+    {name: 'padj', displayName: 'FDR', type: 'number', cellFilter: 'number', sort: {direction: 'asc'}, enableFiltering: false}
+  ];
+
   const gridOptions = {
-    columnDefs: [
-      {name: 'feature'},
-      {name: 'symbol'},
-      {name: 'baseMean', displayName: 'Base Mean', type: 'number', cellFilter: 'number', enableFiltering: false},
-      {name: 'log2FoldChange', displayName: 'Log2 Fold Change', type: 'number', cellFilter: 'number', enableFiltering: false},
-      {name: 'pvalue', displayName: 'P-Value', type: 'number', cellFilter: 'number', enableFiltering: false},
-      {name: 'padj', displayName: 'FDR', type: 'number', cellFilter: 'number', sort: {direction: 'asc'}, enableFiltering: false}
-    ],
+    columnDefs,
     enableFiltering: true,
     enableRowSelection: true,
     enableSelectAll: false,
@@ -90,7 +104,30 @@ function controller($scope, dataService, $log, $timeout, growl) {
     exitOnEsc: true
   };
 
-  Object.assign(main, {
+  const sliderOpts = {
+    showTicksValues: true,
+    showTicks: true,
+    enforceStep: false
+  };
+
+  // debounced functions
+  const _draw = _.debounce(() => {
+    $chart.selectAll('svg').remove();
+
+    $chart.datum(dataState.data)
+      .call(chart);
+
+    $chart.classed('dirty', false);
+  }, 100);
+
+  const _update = _.debounce(() => {
+    chart
+      .updatePoints();
+
+    $chart.classed('dirty', false);
+  }, 100);
+
+  return Object.assign(main, {
     editorOptions: {
       data: main.dataPackage,
       enableOpen: false
@@ -100,6 +137,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
     pcut: 0.1,
     fccut: 0,
     logpcut: -1,
+    alpha: 0.8,
     plot: 'hex',
     selectedData: main.dataPackage.resources[0].data[0],
     upDown: [0, 0],
@@ -119,22 +157,36 @@ function controller($scope, dataService, $log, $timeout, growl) {
     chart,
     $chart,
     updateList,
+    fcAlphaSlider: {
+      showTicksValues: false,
+      showTicks: false,
+      enforceStep: false,
+      floor: 0,
+      ceil: 1,
+      step: 0.01,
+      precision: 2,
+      onEnd: update,
+      translate: (value, sliderId, label) => {
+        switch (label) {
+          case 'model':
+            return `Opacity: ${value}`;
+          default:
+            return value;
+        }
+      }
+    },
     fcCutSlider: {
+      ...sliderOpts,
       floor: 0,
       ceil: 5,
       step: 1,
-      showTicksValues: true,
-      showTicks: true,
-      onEnd: main.update,
-      enforceStep: false
+      onEnd: update
     },
     fdrCutSlider: {
+      ...sliderOpts,
       floor: -5,
       ceil: 0,
       step: 1,
-      showTicksValues: true,
-      showTicks: true,
-      enforceStep: false,
       onEnd: () => {
         main.pcut = Math.pow(10, Number(main.logpcut));
         update();
@@ -145,25 +197,6 @@ function controller($scope, dataService, $log, $timeout, growl) {
       loadDataset(main.dataPackage.resources[0].data[0]);
     }
   });
-
-  // debounced functions
-  const _draw = _.debounce(() => {
-    $chart.selectAll('svg').remove();
-
-    $chart.datum(dataState.data)
-      .call(chart);
-
-    $chart.classed('dirty', false);
-  }, 100);
-
-  const _update = _.debounce(() => {
-    chart
-      .updatePoints();
-
-    $chart.classed('dirty', false);
-  }, 100);
-
-  return;
 
   function loadDataset(set) {
     const resource = main.dataPackage.resources[1];
@@ -220,6 +253,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
       .showScatter(main.plot === 'scatter')
       .showDensity(main.plot === 'hex')
       .highlightFilter(geneCheck)
+      .alpha(main.alpha)
       .width(parseInt($chart.style('width'), 10))
       .cutoffFilter(cutoffCheck);
   }
@@ -255,17 +289,31 @@ function controller($scope, dataService, $log, $timeout, growl) {
 
     const data = resource.data.filter(d => {
       d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
+      delete d.PValue;
+
       d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
+      delete d.FDR;
+
       d.baseMean = Number(d.baseMean) || Number(d.logCPM) || 0.001;  // Base Mean
+      delete d.logCPM;
+
       d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
+      delete d.logFC;
+
       d.symbols = d.symbol.split(';');
       d.symbol = d.symbol || d.feature;
       return d.baseMean > 0.001;
     });
 
-    /* data.filter(d => d.symbol.indexOf(';') > -1).forEach(function(d) {
-      console.log(d.symbol);
-    }); */
+    const ignoredKeys = [
+      'pvalue',
+      'padj',
+      'baseMean',
+      'log2FoldChange',
+      'symbols',
+      'symbol',
+      'feature'
+    ];
 
     if (data.length < 1) {
       growl.error(`Failed to find any features in ${resource.name}`);
@@ -281,9 +329,14 @@ function controller($scope, dataService, $log, $timeout, growl) {
     dataState.byLog2FoldChange = cf.dimension(d => d.log2FoldChange)
       .filterRange([-Infinity, Infinity]);
 
-    dataState.data = dataState.byBaseMean.top(Infinity);
+    main.gridOptions.data = dataState.data = dataState.byBaseMean.top(Infinity);
+    main.gridOptions.columnDefs = columnDefs.slice();
 
-    main.gridOptions.data = dataState.data;
+    Object.keys(dataState.data[0]).forEach(key => {
+      if (!ignoredKeys.includes(key)) {
+        main.gridOptions.columnDefs.push({name: key, visible: false});
+      }
+    });
 
     $log.info('getting unique symbols');
 
@@ -324,7 +377,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
   }
 
   function addSymbols(list) {
-    list.split(' ').forEach(symbol => {
+    list.split(/[\s;]/).forEach(symbol => {
       const item = main.uniqGeneMap[symbol];
       if (item && !main.geneList.includes(item)) {
         main.geneList.push(item);
@@ -360,11 +413,4 @@ function controller($scope, dataService, $log, $timeout, growl) {
   }
 }
 
-export default {
-  controller,
-  template,
-  controllerAs: 'main',
-  bindings: {
-    dataPackage: '<package'
-  }
-};
+export default controller;

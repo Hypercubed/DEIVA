@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/Hypercubed/DEIVA#readme",
   "devDependencies": {
-    "xo": "^0.15.1"
+    "xo": "*"
   },
   "xo": {
     "esnext": true,
@@ -40,6 +40,9 @@
     "envs": [
       "browser"
     ],
+    "rules": {
+      "import/no-extraneous-dependencies": 0
+    },
     "ignores": [
       "app/data/**",
       "gulp/*.js"

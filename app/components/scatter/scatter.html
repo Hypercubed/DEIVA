@@ -80,17 +80,23 @@
               <rzslider rz-slider-model="main.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
             </div>
 
-
-            <div id="fdr-filter" class="col-md-12">
+            <div id="fdr-filter" class="col-md-12 text-right">
               <label>Up: {{main.upDown[0]}}</label>
               <br /><label>Down: {{main.upDown[1]}}</label>
             </div>
-          </div>
 
-          <p />
-          <div id="plot-type">
-            <input type="radio" name="hex" value="hex" checked ng-model="main.plot" ng-change="main.draw()"> Hexplot
-            <input type="radio" name="scatter" value="scatter" ng-model="main.plot" ng-change="main.draw()"> Scatterplot
+            <div class="col-md-12">
+              <label>Plot</label>
+            </div>
+
+            <div class="col-md-12 col-xs-6">
+              <rzslider rz-slider-model="main.alpha" rz-slider-options="main.fcAlphaSlider"></rzslider>
+            </div>
+
+            <div class="col-md-12 col-xs-6">
+              <input type="radio" name="hex" value="hex" checked ng-model="main.plot" ng-change="main.draw()"> Hexplot
+              <input type="radio" name="scatter" value="scatter" ng-model="main.plot" ng-change="main.draw()"> Scatterplot
+            </div>
           </div>
         </form>
       </div>
