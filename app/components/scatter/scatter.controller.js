@@ -4,7 +4,7 @@ import crossfilter from 'crossfilter';
 import _ from 'lodash';
 import Clipboard from 'clipboard';
 
-import {processor} from 'chi-datapackage';
+import {processor} from 'common/services/datapackage/datapackage';
 
 import introData from './intro.json!';
 import aboutHTML from './intro.md!';
