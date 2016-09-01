@@ -4,12 +4,14 @@ import crossfilter from 'crossfilter';
 import _ from 'lodash';
 import Clipboard from 'clipboard';
 
-import {processor} from 'common/services/datapackage/datapackage';
+import dp from 'common/services/datapackage/datapackage';
 
 import introData from './intro.json!';
 import aboutHTML from './intro.md!';
 
 import ScatterChart from './scatter-chart';
+
+const mime = dp.normalize.mime;
 
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
 function controller($scope, dataService, $log, $timeout, growl) {
@@ -200,7 +202,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
 
   function loadDataset(set) {
     const resource = main.dataPackage.resources[1];
-    resource.url = `./data/${set.filename}`;
+    resource.url = resource.path = `./data/${set.filename}`;
     resource.name = set.name;
 
     dataService.reloadResource(resource)
@@ -405,7 +407,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
       active: true
     });
 
-    dataService.processResource(main.dataPackage.resources[1]);
+    dp.processResource(main.dataPackage.resources[1]);
     main.selectedData = null;
     main.gene = '';
     main.geneList = [];
