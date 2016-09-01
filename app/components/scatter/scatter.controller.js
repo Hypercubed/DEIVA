@@ -4,7 +4,7 @@ import crossfilter from 'crossfilter';
 import _ from 'lodash';
 import Clipboard from 'clipboard';
 
-import mime from 'common/services/datapackage/mime';
+import {processor} from 'chi-datapackage';
 
 import introData from './intro.json!';
 import aboutHTML from './intro.md!';
@@ -203,10 +203,11 @@ function controller($scope, dataService, $log, $timeout, growl) {
     resource.url = `./data/${set.filename}`;
     resource.name = set.name;
 
-    dataService.reloadResource(resource).then(() => {
-      main.gene = set.gene || set.symbols || '';
-      main.change();
-    });
+    dataService.reloadResource(resource)
+      .then(() => {
+        main.gene = set.gene || set.symbols || '';
+        main.change();
+      });
   }
 
   function updateList() {

@@ -1,0 +1,48 @@
+[
+  {
+    "target": "#data-set",
+    "content": "Simply select a diff. gene expr. test of interest from the dropdown..."
+  },{
+    "target": "#data-drop",
+    "content": "...or, just drop a custom input file here!"
+  },{
+    "target": "#_scatter__chart",
+    "content": "Highlight genes by drawing a rectangle."
+  },{
+    "target": "#chart-toolbar",
+    "content": "Use the toolbar to zoom into selected rectangle and to reset.",
+    "position": "left"
+  },{
+    "target": "#plot-type",
+    "content": "Switch between hexplot (fast) and scatter plot (slower but with full detail)"
+  },{
+    "target": ".expression-grid",
+    "content": "This table shows the highlighted genes from the plot area. You can sort any of the columns (just click the column header)!",
+    "position": "top"
+  },{
+    "target": ".expression-grid .ui-grid-icon-container",
+    "content": "Export visible data from the table for later import into any spread sheet application.",
+    "position": "left"
+  },{
+    "target": "#data-download",
+    "content": "Export the complete raw data here."
+  },{
+    "target": "#svg-download",
+    "content": "Export the scatter plot as SVG."
+  },{
+    "target": "#gene-select",
+    "content": "Locate one or more genes of interest in the scatter plot. Different colors are automatically assigned."
+  },{
+    "target": "#gene-select",
+    "content": "You can paste entire list of space separated genes!"
+  },{
+    "target": "#clipboard-btn",
+    "content": "Use this button to copy the current list."
+  },{
+  "target": "#fc-filter",
+  "content": "Set a custom abs. log2 foldchange for genes highlighted in red."
+  },{
+    "target": "#fdr-filter",
+    "content": "Set a custom FDR for genes highlighted in red."
+  }
+]

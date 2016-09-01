@@ -2,14 +2,12 @@ import angular from 'angular';
 
 import errorHTML from 'components/error/error.html!text';
 
-import 'ui-grid';
-import 'ui-grid/ui-grid.css!';
+import grid from 'common/services/grid/grid';
 
 import 'ui-select/dist/select';
 import 'ui-select/dist/select.css!';
 
 import angularSlider from 'angularjs-slider';
-import 'angularjs-slider/dist/rzslider.css!';
 import './scatter/slider.css!';
 
 import 'intro.js/introjs.css!';
@@ -39,9 +37,7 @@ function configRoute($routeProvider) {
 
 const routes = angular
   .module('routes', [
-    'ui.grid',
-    'ui.grid.exporter',
-    'ui.grid.resizeColumns',
+    grid,
     'ui.select',
     'angular-intro',
     angularSlider.name])

@@ -105,7 +105,7 @@
     <div class="col-md-9" on-resize="main.draw()">
       <div class="well chart-height chart-well">
         <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar" role="group" aria-label="toolbar">
-          <button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG">
+          <button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG" ng-disabled="!main.editorOptions.enableSvgDownload">
             <i class="fa fa-camera" aria-hidden="true"></i>
           </button>
           <button type="button" class="btn btn-sm btn-default" ng-disabled="main.chart.brush.empty()" ng-click="main.chart.zoomExtent()" title="zoom to selection">
