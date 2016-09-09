@@ -64,7 +64,7 @@ Example for a DEIVA input file:
 
 **Columns may appear in any order.**
 
-**Multiple symbols in the symbol must b separated by semicolons**
+**Multiple symbols in the symbol column must be separated by semicolons.**
 
 ### edgeR flavor
 
