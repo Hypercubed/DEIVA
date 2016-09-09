@@ -106,3 +106,21 @@
 ._scatter.hover .drop-here {
   visibility: visible;
 }
+
+.d3-tip-scatter {
+  width: 300px;
+  text-align: center;
+  font: 11px sans-serif;
+  color: #b0c4de;
+}
+
+.d3-tip-scatter p {
+  color: #fff;
+}
+
+.d3-tip.animate {
+  left: 0;  top: 0;
+  opacity: 0;
+  transition: left 0.2s ease-out, top 0.2s ease-out, opacity 0.2s ease-out;
+  -webkit-transition: left 0.2s ease-out, top 0.2s ease-out, opacity 0.2s ease-out;
+}

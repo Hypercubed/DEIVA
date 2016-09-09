@@ -1,20 +1,20 @@
+/* eslint max-lines: 0 */
+
 import d3 from 'd3';
 
 import crossfilter from 'crossfilter';
 import _ from 'lodash';
 import Clipboard from 'clipboard';
 
-import dp from 'common/services/datapackage/datapackage';
+// import dp from 'common/services/datapackage/datapackage';
 
 import introData from './intro.json!';
 import aboutHTML from './intro.md!';
 
 import ScatterChart from './scatter-chart';
 
-const mime = dp.normalize.mime;
-
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
-function controller($scope, dataService, $log, $timeout, growl) {
+function controller($scope, dataService, $log, $timeout, growl) {  // eslint-disable-line max-params
   const main = this;
 
   const cellTemplate = `
@@ -147,6 +147,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
     dataState,
     introOptions,
     dropped,
+    selectFile,
     gridOptions,
     draw,
     update,
@@ -201,14 +202,18 @@ function controller($scope, dataService, $log, $timeout, growl) {
   });
 
   function loadDataset(set) {
-    const resource = main.dataPackage.resources[1];
-    resource.url = resource.path = `./data/${set.filename}`;
-    resource.name = set.name;
-
-    dataService.reloadResource(resource)
-      .then(() => {
+    dataService.loadResource(main.dataPackage, {
+      path: set.filename,
+      schema: main.dataPackage.schemas.deseq2oredgeR
+    })
+      .then(r => {
+        if (r.$error) {
+          $log.error(r);
+          return $chart.classed('dirty', false);
+        }
+        main.dataPackage.resources[1] = r;
         main.gene = set.gene || set.symbols || '';
-        main.change();
+        change();
       });
   }
 
@@ -288,6 +293,7 @@ function controller($scope, dataService, $log, $timeout, growl) {
   }
 
   function processData() {
+    $log.debug('processData');
     const resource = main.dataPackage.resources[1];
 
     const data = resource.data.filter(d => {
@@ -303,8 +309,9 @@ function controller($scope, dataService, $log, $timeout, growl) {
       d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
       delete d.logFC;
 
-      d.symbols = d.symbol.split(';');
       d.symbol = d.symbol || d.feature;
+      d.symbols = d.symbol.split(';');
+
       return d.baseMean > 0.001;
     });
 
@@ -388,26 +395,32 @@ function controller($scope, dataService, $log, $timeout, growl) {
     });
   }
 
+  function selectFile(file) {
+    dropped(file);
+  }
+
   function dropped(file) {
     $chart.classed('dirty', true);
 
-    let mediatype = mime.lookup(file.name);
+    const mediatype = file.type || dataService.mime.lookup(file.name);
 
-    //  todo: error on non txt, tsv, csv, json
-
-    if (mediatype === 'text/plain') {
-      mediatype = mime.lookup('tsv');
-    }
-
-    Object.assign(main.dataPackage.resources[1], {
+    const newResource = dataService.processResource({
       path: file.name || 'file',
       name: file.name || 'file',
-      mediatype,
+      mediatype: (mediatype === 'text/plain') ? 'text/tab-separated-values' : mediatype,
       content: file.content || '',
-      active: true
+      active: true,
+      $error: false,
+      $errors: [],
+      schema: main.dataPackage.schemas.deseq2oredgeR
     });
 
-    dp.processResource(main.dataPackage.resources[1]);
+    if (newResource.$error) {
+      return $chart.classed('dirty', false);
+    }
+
+    main.dataPackage.resources[1] = newResource;
+
     main.selectedData = null;
     main.gene = '';
     main.geneList = [];

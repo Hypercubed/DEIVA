@@ -1,3 +1,4 @@
+/* eslint max-lines: 0 */
 import d3 from 'd3';
 
 import 'd3-plugins/hexbin/hexbin';
@@ -19,13 +20,13 @@ export default function Scatter(opts = {}) {
   let showDensity = true;
 
   const xTickFormat = d3.format('g');
-  // const yTickFormat = d3.format('e');
+  const labelFormat = d3.format('1.3f');
 
   const xValue = d => (Number(d.baseMean) || 0.01); // data -> value
   const xScale = d3.scale.log().range([0, width]); // value -> display
   const xMap = d => xScale(xValue(d)); // data -> display
   const xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(d => {
-    const x = Math.log(d) / Math.log(10) + 1e-6;
+    const x = Math.log10(d) + 1e-6;
     return Math.abs(x - Math.floor(x)) < 0.1 ? xTickFormat(d) : '';
   });
 
@@ -60,13 +61,17 @@ export default function Scatter(opts = {}) {
     .clamp(false);
 
   const tooltipHtml = d => `
-    ${d.symbol}<br />
-    baseMean: ${d.baseMean}<br />
-    log2FoldChange: ${d.log2FoldChange}<br />
-    Adjusted p-value: ${d.padj}`;
+    <p>
+      ${d.symbol}
+      </br />
+      ${d.feature}
+    </p>
+    baseMean: ${labelFormat(d.baseMean)}<br />
+    log2FoldChange: ${labelFormat(d.log2FoldChange)}<br />
+    Adjusted p-value: ${labelFormat(d.padj)}`;
 
   const tooltips = d3Tip()
-    .attr('class', 'd3-tip')
+    .attr('class', 'd3-tip d3-tip-scatter animate')
     .html(tooltipHtml)
     .offset([-10, 0]);
 
@@ -176,12 +181,41 @@ export default function Scatter(opts = {}) {
       const pointsG = clipped.append('g')
         .attr('class', 'points');
 
+      const midLine = container.append('line')
+        .attr('class', 'mid-line')
+        .attr('x1', 0)
+        .attr('x2', width)
+        .attr('y1', yScale(0))
+        .attr('y2', yScale(0))
+        .attr('stroke-dasharray', '10, 5')
+        .style({
+          'fill': 'none',
+          'stroke': '#A3A3A3',
+          'stroke-width': '1px',
+          'shape-rendering': 'crispEdges'
+        });
+
       clipped.select('.extent').on('dblclick', () => {
-        console.log('dblclick.extent');
         xScale.domain(xExtent);
         yScale.domain(yExtent);
         zoomed();
       });
+
+      hexbin
+        .size([width, height]);
+
+      if (showDensity) {
+        updateDensity();
+      }
+
+      updatePoints();
+      zoomPoints();
+
+      svg.call(tooltips);
+
+      scatter.updatePoints = updatePoints;
+      scatter.zoomExtent = zoomToExtent;
+      scatter.zoomOut = zoomOut;
 
       function zoomOut() {
         xScale.domain(xExtent);
@@ -216,27 +250,15 @@ export default function Scatter(opts = {}) {
         container.select('g.x.axis').call(xAxis);
         container.select('g.y.axis').call(yAxis);
 
+        midLine
+          .attr('y1', yScale(0))
+          .attr('y2', yScale(0));
+
         if (showDensity) {
           updateDensity();
         }
         zoomPoints();
       }
-
-      hexbin
-        .size([width, height]);
-
-      if (showDensity) {
-        updateDensity();
-      }
-
-      updatePoints();
-      zoomPoints();
-
-      svg.call(tooltips);
-
-      scatter.updatePoints = updatePoints;
-      scatter.zoomExtent = zoomToExtent;
-      scatter.zoomOut = zoomOut;
 
       function updateDensity() {
         const hexPath = hexbin
