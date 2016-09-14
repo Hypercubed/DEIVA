@@ -40,7 +40,7 @@ const columnDefs = [
 const gridOptions = {
   columnDefs,
   enableFiltering: true,
-  enableRowSelection: true,
+  enableRowSelection: false,
   enableSelectAll: false,
   selectionRowHeaderWidth: 35,
   enableFullRowSelection: true,
