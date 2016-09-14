@@ -191,21 +191,20 @@ export default function Scatter(opts = {}) {
       scatter.zoomOut = zoomOut;
       scatter.zoomHome = zoomHome;
 
-      draw();
-      return update();
+      return draw();
 
       function draw() {
         if (showDensity) {
           drawDensity();
         }
-        return drawPoints();
+        return update();
       }
 
       function update() {
         if (showDensity) {
-          updateDensity();
+          updateDensityColor();
         }
-        return updatePoints();
+        return drawPoints();
       }
 
       function panLimit() {
@@ -282,9 +281,9 @@ export default function Scatter(opts = {}) {
 
         if (showDensity) {
           drawDensity();
-          updateDensity();
+          updateDensityColor();
         }
-        updatePoints();
+        updatePointsPosition();
       }
 
       function drawDensity() {
@@ -317,7 +316,7 @@ export default function Scatter(opts = {}) {
         hexagon.exit().remove();
       }
 
-      function updateDensity() {
+      function updateDensityColor() {
         hexagonG.style('opacity', alpha);
 
         hd.forEach(d => {
@@ -387,7 +386,7 @@ export default function Scatter(opts = {}) {
           });
       }
 
-      function updatePoints() {
+      function updatePointsPosition() {
         pointsG.selectAll('.point')
           .attr('transform', d => `translate(${xMap(d)},${yMap(d)})`);
       }
