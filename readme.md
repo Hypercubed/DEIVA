@@ -105,7 +105,7 @@ DEIVA was developed using the [Project χ toolkit](https://github.com/Hypercubed
 ```sh
 git clone https://github.com/Hypercubed/Project-Chi.git
 cd Project-Chi
-git checkout tags/v1.0.0-rc.6  # ensure you are using the same version of Project χ
+git checkout tags/v1.0.0-rc.10  # ensure you are using the same version of Project χ
 npm install # jspm install is run post-install by npm
 git clone https://github.com/Hypercubed/DEIVA.git dataset/DEIVA
 ```

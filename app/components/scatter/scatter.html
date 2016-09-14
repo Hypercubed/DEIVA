@@ -37,20 +37,19 @@
               We couldn't find any matches...
             </ui-select-no-choice>
             <ui-select-match placeholder="Select genes...">
-              {{$item.symbol}}
+              {{::$item.symbol}}
               <span class="badge" ng-style="{ backgroundColor: main.colorScale($index) }">
                 <small>
-                  {{$item.count}}
+                  {{::$item.count}}
                 </small>
               </span>
             </ui-select-match>
             <ui-select-choices repeat="gene in main.uniqGeneList | filter: $select.search | limitTo: 100 track by gene.symbol"
-                refresh-delay="0"
+                refresh-delay="1000"
                 ng-class="{ hide: $select.search.length < 1 }">
-                <span ng-bind-html="gene.symbol | highlight: $select.search"></span>
+                <span ng-bind-html="::gene.symbol | highlight: $select.search"></span>
                 <span class="badge">
-                  <small>
-                    {{gene.count}}
+                  <small ng-bind="::gene.count">
                   </small>
                 </span>
             </ui-select-choices>
@@ -106,19 +105,20 @@
     <div class="col-md-9" on-resize="main.draw()">
       <div class="well chart-height chart-well">
         <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar" role="group" aria-label="toolbar">
-          <button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG" ng-disabled="!main.editorOptions.enableSvgDownload">
+          <!-- button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG" ng-disabled="!main.editorOptions.enableSvgDownload">
             <i class="fa fa-camera" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="btn btn-sm btn-default" ng-disabled="main.chart.brush.empty()" ng-click="main.chart.zoomExtent()" title="zoom to selection">
+          </button -->
+          <button type="button" class="btn btn-sm btn-default" ng-click="main.chartAction('zoomExtent')" title="zoom in">
             <i class="fa fa-search-plus" aria-hidden="true"></i>
           </button>
 
-          <button type="button" class="btn btn-default" ng-click="main.chart.zoomOut(); main.updateList();" title="zoom out">
+          <button type="button" class="btn btn-default" ng-click="main.chartAction('zoomOut')" title="zoom out">
+            <i class="fa fa-search-minus" aria-hidden="true"></i>
+          </button>
+
+          <button type="button" class="btn btn-default" ng-click="main.chartAction('zoomHome')" title="zoom home">
             <i class="fa fa-home" aria-hidden="true"></i>
           </button>
-          <!-- button id="screenfull" type="button" class="btn btn-default" title="fullscreen">
-            <i class="fa fa-arrows-alt" aria-hidden="true"></i>
-          </button -->
         </div>
 
         <div id="_scatter__chart" class="_scatter" file-dropzone="[text/plain,text/csv,text/tab-separated-values]" data-max-file-size="30" dropped="main.dropped(file)">

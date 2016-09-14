@@ -6,3 +6,4 @@ _\( managed using [todo-md](https://github.com/Hypercubed/todo-md) \)_
 - [x] Test firefox and safari
 - [x] Test MS edge
 - [ ] Make chart toolbar a Project-chi component
+- [ ] Set shape-rendering: optimizeSpeed when in scatter plot

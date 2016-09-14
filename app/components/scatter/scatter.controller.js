@@ -13,54 +13,75 @@ import aboutHTML from './intro.md!';
 
 import ScatterChart from './scatter-chart';
 
+const cellTemplate = `
+<div class="ui-grid-cell-contents">
+  <span ng-switch="COL_FIELD">
+    <span ng-switch-when="NA">
+      {{COL_FIELD}}
+    </span>
+    <span ng-switch-default>
+      <a href ng-click="grid.appScope.main.pasteSymbols(COL_FIELD)">
+        {{COL_FIELD}}
+      </a>
+    </span>
+  </span>
+</div>`;
+
+// grid
+const columnDefs = [
+  {name: 'feature'},
+  {name: 'symbol', cellTemplate},
+  {name: 'baseMean', displayName: 'Base Mean', type: 'number', cellFilter: 'number', enableFiltering: false},
+  {name: 'log2FoldChange', displayName: 'Log2 Fold Change', type: 'number', cellFilter: 'number', enableFiltering: false},
+  {name: 'pvalue', displayName: 'P-Value', type: 'number', cellFilter: 'number', enableFiltering: false},
+  {name: 'padj', displayName: 'FDR', type: 'number', cellFilter: 'number', sort: {direction: 'asc'}, enableFiltering: false}
+];
+
+const gridOptions = {
+  columnDefs,
+  enableFiltering: true,
+  enableRowSelection: true,
+  enableSelectAll: false,
+  selectionRowHeaderWidth: 35,
+  enableFullRowSelection: true,
+  enableRowHeaderSelection: false,
+  enableColumnResizing: true,
+  rowHeight: 25,
+  showGridFooter: false,
+  multiSelect: false,
+  enableColumnMenus: false,
+  noUnselect: true,
+  enableGridMenu: true,
+  exporterMenuCsv: true,
+  exporterMenuPdf: false,
+  exporterCsvFilename: 'selection.csv',
+  exporterMenuAllData: false
+};
+
+// setup intro
+const introOptions = {
+  steps: [
+    {
+      element: '#charts',
+      intro: aboutHTML,
+      position: 'floating'
+    },
+    ...introData
+  ],
+  showStepNumbers: false,
+  exitOnOverlayClick: true,
+  exitOnEsc: true
+};
+
+const sliderOpts = {
+  showTicksValues: true,
+  showTicks: true,
+  enforceStep: false
+};
+
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
 function controller($scope, dataService, $log, $timeout, growl) {  // eslint-disable-line max-params
   const main = this;
-
-  const cellTemplate = `
-  <div class="ui-grid-cell-contents">
-    <span ng-switch="COL_FIELD">
-      <span ng-switch-when="NA">
-        {{COL_FIELD}}
-      </span>
-      <span ng-switch-default>
-        <a href ng-click="grid.appScope.main.pasteSymbols(COL_FIELD)">
-          {{COL_FIELD}}
-        </a>
-      </span>
-    </span>
-  </div>`;
-
-  // grid
-  const columnDefs = [
-    {name: 'feature'},
-    {name: 'symbol', cellTemplate},
-    {name: 'baseMean', displayName: 'Base Mean', type: 'number', cellFilter: 'number', enableFiltering: false},
-    {name: 'log2FoldChange', displayName: 'Log2 Fold Change', type: 'number', cellFilter: 'number', enableFiltering: false},
-    {name: 'pvalue', displayName: 'P-Value', type: 'number', cellFilter: 'number', enableFiltering: false},
-    {name: 'padj', displayName: 'FDR', type: 'number', cellFilter: 'number', sort: {direction: 'asc'}, enableFiltering: false}
-  ];
-
-  const gridOptions = {
-    columnDefs,
-    enableFiltering: true,
-    enableRowSelection: true,
-    enableSelectAll: false,
-    selectionRowHeaderWidth: 35,
-    enableFullRowSelection: true,
-    enableRowHeaderSelection: false,
-    enableColumnResizing: true,
-    rowHeight: 25,
-    showGridFooter: false,
-    multiSelect: false,
-    enableColumnMenus: false,
-    noUnselect: true,
-    enableGridMenu: true,
-    exporterMenuCsv: true,
-    exporterMenuPdf: false,
-    exporterCsvFilename: 'selection.csv',
-    exporterMenuAllData: false
-  };
 
   // chart
   const $chart = d3.select('#_scatter__chart');
@@ -73,12 +94,6 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     highlightColor: colorScale
   });
 
-  chart.brush.on('brushend.select', () => {
-    $scope.$apply(() => {
-      updateList();
-    });
-  });
-
   // data
   const dataState = {};
 
@@ -88,32 +103,54 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   });
 
   clipboard.on('error', () => {
-    prompt('This browser does not suppport copying directly to clipboard.  Copy this text instead.', main.geneList.map(x => x.symbol).join(' ')); // eslint-disable-line no-alert
+    prompt( // eslint-disable-line no-alert
+      'This browser does not suppport copying directly to clipboard.  Copy this text instead.',
+      main.geneList.map(x => x.symbol).join(' ')
+    );
   });
 
-  // setup intro
-  const introOptions = {
-    steps: [
-      {
-        element: '#charts',
-        intro: aboutHTML,
-        position: 'floating'
-      },
-      ...introData
-    ],
-    showStepNumbers: false,
-    exitOnOverlayClick: true,
-    exitOnEsc: true
+  // sliderOpt
+  const fcAlphaSlider = {
+    showTicksValues: false,
+    showTicks: false,
+    enforceStep: false,
+    floor: 0,
+    ceil: 1,
+    step: 0.01,
+    precision: 2,
+    onEnd: updateChartData,
+    translate: (value, sliderId, label) => {
+      switch (label) {
+        case 'model':
+          return `Opacity: ${value}`;
+        default:
+          return value;
+      }
+    }
   };
 
-  const sliderOpts = {
-    showTicksValues: true,
-    showTicks: true,
-    enforceStep: false
+  const fcCutSlider = {
+    ...sliderOpts,
+    floor: 0,
+    ceil: 5,
+    step: 1,
+    onEnd: updateChartData
+  };
+
+  const fdrCutSlider = {
+    ...sliderOpts,
+    floor: -5,
+    ceil: 0,
+    step: 1,
+    onEnd: () => {
+      main.pcut = Math.pow(10, Number(main.logpcut));
+      updateChartData();
+    },
+    translate: value => `1e${value}`
   };
 
   // debounced functions
-  const _draw = _.debounce(() => {
+  const δdrawChart = _.debounce(() => {
     $chart.selectAll('svg').remove();
 
     $chart.datum(dataState.data)
@@ -122,11 +159,19 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     $chart.classed('dirty', false);
   }, 100);
 
-  const _update = _.debounce(() => {
-    chart
-      .updatePoints();
+  const δupdateList = _.debounce(() => {
+    $scope.$applyAsync(() => {
+      updateList();
+    });
+  }, 100);
 
-    $chart.classed('dirty', false);
+  const δchartAction = _.debounce(action => {
+    $chart.classed('dirty', true);
+    $scope.$applyAsync(() => {
+      chart[action]();
+      // updateList();
+      $chart.classed('dirty', false);
+    });
   }, 100);
 
   return Object.assign(main, {
@@ -149,54 +194,23 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     dropped,
     selectFile,
     gridOptions,
-    draw,
-    update,
+    draw: drawChart,
+    update: updateChartData,
     change,
     loadDataset,
     pasteSymbols: list => {
       addSymbols(list);
-      update();
+      updateChartData();
     },
     chart,
     $chart,
-    updateList,
-    fcAlphaSlider: {
-      showTicksValues: false,
-      showTicks: false,
-      enforceStep: false,
-      floor: 0,
-      ceil: 1,
-      step: 0.01,
-      precision: 2,
-      onEnd: update,
-      translate: (value, sliderId, label) => {
-        switch (label) {
-          case 'model':
-            return `Opacity: ${value}`;
-          default:
-            return value;
-        }
-      }
-    },
-    fcCutSlider: {
-      ...sliderOpts,
-      floor: 0,
-      ceil: 5,
-      step: 1,
-      onEnd: update
-    },
-    fdrCutSlider: {
-      ...sliderOpts,
-      floor: -5,
-      ceil: 0,
-      step: 1,
-      onEnd: () => {
-        main.pcut = Math.pow(10, Number(main.logpcut));
-        update();
-      },
-      translate: value => `1e${value}`
-    },
+    updateList: δupdateList,
+    fcAlphaSlider,
+    fcCutSlider,
+    fdrCutSlider,
+    chartAction: δchartAction,
     $onInit: () => {
+      chart.brush.on('brushend.select', δupdateList);
       loadDataset(main.dataPackage.resources[0].data[0]);
     }
   });
@@ -218,8 +232,8 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   }
 
   function updateList() {
+    $log.debug('update list');
     if (chart.brush.empty()) {
-      // console.log('clear');
       dataState.byBaseMean.filterRange([0.01, Infinity]);
       dataState.byLog2FoldChange.filterRange([-Infinity, Infinity]);
 
@@ -234,43 +248,55 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     }
   }
 
-  function setup() {
+  function setupChart() {
+    if (!dataState.data) {
+      return;  // not sure why I need this.
+    }
+
     const pcut = Math.pow(10, Number(main.logpcut));
     const fccut = main.fccut;
+    const cutoffCheck = d => d.padj <= pcut && (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
 
     const genesSearch = main.geneList.map(x => x.symbol);
 
-    const geneCheck = function (d) {
+    const geneCheck = d => {
       for (let i = 0; i < d.symbols.length; i++) {
-        const j = genesSearch.indexOf(d.symbols[i]);
-        if (j > -1) {
-          return j;
+        for (let j = 0; j < genesSearch.length; j++) {
+          if (genesSearch[j] === d.symbols[i]) {
+            return j;
+          }
         }
       }
       return -1;
     };
 
-    const cutoffCheck = d => d.padj <= Number(pcut) && Math.abs(d.log2FoldChange) > fccut;
-
-    const d = dataState.data.filter(cutoffCheck);
-
-    main.upDown[0] = d.filter(d => d.log2FoldChange > 0).length;
-    main.upDown[1] = d.length - main.upDown[0];
+    const d = dataState.data.filter(d => {  // update and filter by cutoff
+      d.$cutoffCheck = cutoffCheck(d);
+      d.highlight = geneCheck(d);
+      d.$showPoint = d.highlight > -1;
+      return d.$cutoffCheck;
+    });
 
     chart
       .showScatter(main.plot === 'scatter')
       .showDensity(main.plot === 'hex')
-      .highlightFilter(geneCheck)
+      // .highlightFilter(geneCheck)
+      .highlightDomain(genesSearch)
       .alpha(main.alpha)
       .width(parseInt($chart.style('width'), 10))
-      .cutoffFilter(cutoffCheck);
+      // .cutoffFilter(cutoffCheck)
+      ;
+
+    // Update up/down count
+    main.upDown[0] = d.filter(d => d.log2FoldChange > 0).length;
+    main.upDown[1] = d.length - main.upDown[0];
   }
 
-  function update() {
+  function updateChartData() {
     $log.debug('update');
     $chart.classed('dirty', true);
-    setup();
-    _update();
+    setupChart();
+    δchartAction('updatePoints');
   }
 
   function change() {
@@ -278,18 +304,15 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     $chart.classed('dirty', true);
     $timeout(() => {
       processData();
-      setup();
-      draw();
+      drawChart();
     });
   }
 
-  function draw() {
+  function drawChart() {
     $log.debug('draw');
-
     $chart.classed('dirty', true);
-
-    setup();
-    _draw();
+    setupChart();
+    δdrawChart();
   }
 
   function processData() {
