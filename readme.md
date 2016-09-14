@@ -46,7 +46,7 @@ The input file needs to have the following columns:
 * pvalue
 * padj
 
-The header *does* contain an entry for the first column! Typically, when wrinting a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
+The header *does* contain an entry for the first column! Typically, when writing a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
@@ -96,7 +96,7 @@ See this git repository, describing how the example input files for DEIVA have b
 
 ## Pre-built
 
-DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch](https://github.com/Hypercubed/DEIVA/tree/gh-pages) of this project and replace the files in the `app/data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` and `index.tsv` files (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
+DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch Zip file](https://github.com/Hypercubed/DEIVA/archive/gh-pages.zip) and replace the files in the `data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` to reference the initial data file to load in DEIVA and the `index.tsv` file to contain a list of additional data files available in the interface (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
 
 ## Building from source
 
@@ -105,7 +105,7 @@ DEIVA was developed using the [Project χ toolkit](https://github.com/Hypercubed
 ```sh
 git clone https://github.com/Hypercubed/Project-Chi.git
 cd Project-Chi
-git checkout tags/v1.0.0-beta  # ensure you are using the same version of Project χ
+git checkout tags/v1.0.0-rc.10  # ensure you are using the same version of Project χ
 npm install # jspm install is run post-install by npm
 git clone https://github.com/Hypercubed/DEIVA.git dataset/DEIVA
 ```

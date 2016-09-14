@@ -1,8 +1,10 @@
+/* eslint max-lines: 0 */
 import d3 from 'd3';
+import {legend} from 'd3-svg-legend';
 
 import 'd3-plugins/hexbin/hexbin';
 
-import d3Tip from 'd3-tip';
+import tip from 'd3-tip';
 import 'd3-tip/examples/example-styles.css!';
 
 import {moveToFront} from './chart.utils';
@@ -19,13 +21,13 @@ export default function Scatter(opts = {}) {
   let showDensity = true;
 
   const xTickFormat = d3.format('g');
-  // const yTickFormat = d3.format('e');
+  const labelFormat = d3.format('1.3f');
 
   const xValue = d => (Number(d.baseMean) || 0.01); // data -> value
   const xScale = d3.scale.log().range([0, width]); // value -> display
   const xMap = d => xScale(xValue(d)); // data -> display
   const xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(d => {
-    const x = Math.log(d) / Math.log(10) + 1e-6;
+    const x = Math.log10(d) + 1e-6;
     return Math.abs(x - Math.floor(x)) < 0.1 ? xTickFormat(d) : '';
   });
 
@@ -36,8 +38,9 @@ export default function Scatter(opts = {}) {
 
   const highlightColor = opts.highlightColor || d3.scale.category10();
 
-  let highlightFilter = () => false;
-  let cutoffFilter = d => d.padj <= 0.05;
+  // const highlightFilter = d => d.highlight;
+  let highlightDomain = highlightColor.domain();
+  // const cutoffFilter = d => d.$cutoffCheck;
 
   const hsize = 4;
 
@@ -60,13 +63,17 @@ export default function Scatter(opts = {}) {
     .clamp(false);
 
   const tooltipHtml = d => `
-    ${d.symbol}<br />
-    baseMean: ${d.baseMean}<br />
-    log2FoldChange: ${d.log2FoldChange}<br />
-    Adjusted p-value: ${d.padj}`;
+    <p>
+      ${d.symbol}
+      </br />
+      ${d.feature}
+    </p>
+    baseMean: ${labelFormat(d.baseMean)}<br />
+    log2FoldChange: ${labelFormat(d.log2FoldChange)}<br />
+    Adjusted p-value: ${labelFormat(d.padj)}`;
 
-  const tooltips = d3Tip()
-    .attr('class', 'd3-tip')
+  const tooltip = tip()
+    .attr('class', 'd3-tip d3-tip-scatter' + (showScatter ? '' : ' animate'))
     .html(tooltipHtml)
     .offset([-10, 0]);
 
@@ -81,6 +88,10 @@ export default function Scatter(opts = {}) {
 
       const xExtent = d3.extent(d, xValue);
       const yExtent = d3.extent(d, yValue);
+
+      const zoomHistory = [];
+
+      let hd = null;
 
       xExtent[1] *= 2;
       xExtent[0] /= 2;
@@ -97,6 +108,105 @@ export default function Scatter(opts = {}) {
         .x(xScale)
         .y(yScale)
         .on('zoom', zoomed);
+
+      el.selectAll('svg').remove();
+
+      const svg = el.append('svg')
+        .attr('class', showScatter ? 'scatter' : 'hexbin')
+        .attr('title', title)
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      svg.append('clipPath')       // define a clip path
+          .attr('id', 'rect-clip') // give the clipPath an ID
+        .append('rect')          // shape it as an ellipse
+          .attr('width', width)
+          .attr('height', height);
+
+      const container = svg.append('g');
+
+      const clipped = container.append('g')
+        .attr('clip-path', 'url(#rect-clip)');
+
+      container.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', `translate(0,${height})`)
+        .call(xAxis)
+        .append('text')
+          .attr('transform', 'rotate(0)')
+          .attr('x', width)
+          .attr('dy', '-.71em')
+          // .style('text-anchor', 'end')
+          .text('baseMean');
+
+      container.append('g')
+        .attr('class', 'y axis')
+        .call(yAxis)
+        .append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 6)
+        .attr('dy', '.71em')
+        // .style('text-anchor', 'end')
+        .text('log2FoldChange');
+
+      const hexagonG = clipped.append('g')
+        .attr('class', 'hexagons')
+        .style('opacity', alpha);
+
+      const $brush = clipped.append('g')
+        .attr('class', 'brush')
+        .call(brush);
+
+      const pointsG = clipped.append('g')
+        .attr('class', 'points');
+
+      const midLine = container.append('line')
+        .attr('class', 'mid-line')
+        .attr('x1', 0)
+        .attr('x2', width)
+        .attr('y1', yScale(0))
+        .attr('y2', yScale(0))
+        .attr('stroke-dasharray', '10, 5');
+
+      container.append('g')
+        .attr('class', 'legendOrdinal')
+        .attr('transform', 'translate(30,20)');
+
+      const legendOrdinal = legend.color()
+        .shape('circle')
+        .shapePadding(10)
+        .shapeRadius(5)
+        .scale(highlightColor);
+
+      hexbin
+        .size([width, height]);
+
+      tooltip.attr('class', 'd3-tip d3-tip-scatter n' + (showScatter ? '' : ' animate'));
+      svg.call(tooltip);
+
+      scatter.updatePoints = update;
+      scatter.zoomExtent = zoomToExtent;
+      scatter.zoomOut = zoomOut;
+      scatter.zoomHome = zoomHome;
+
+      draw();
+      return update();
+
+      function draw() {
+        if (showDensity) {
+          drawDensity();
+        }
+        return drawPoints();
+      }
+
+      function update() {
+        if (showDensity) {
+          updateDensity();
+        }
+        return updatePoints();
+      }
 
       function panLimit() {
         // let tx = zoom.translate()[0];
@@ -122,92 +232,42 @@ export default function Scatter(opts = {}) {
         // return [tx, ty];
       }
 
-      el.selectAll('svg').remove();
-
-      const svg = el.append('svg')
-        .attr('title', title)
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-          .attr('transform', `translate(${margin.left},${margin.top})`)
-            // .call(zoom)
-          ;
-
-      svg.append('clipPath')       // define a clip path
-          .attr('id', 'rect-clip') // give the clipPath an ID
-        .append('rect')          // shape it as an ellipse
-          .attr('width', width)
-          .attr('height', height);
-
-      const container = svg.append('g');
-
-      const clipped = container.append('g')
-        .attr('clip-path', 'url(#rect-clip)');
-
-      container.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', `translate(0,${height})`)
-        .call(xAxis)
-        .append('text')
-        .attr('transform', 'rotate(0)')
-        .attr('x', width)
-        .attr('dy', '-.71em')
-        .style('text-anchor', 'end')
-        .text('baseMean');
-
-      container.append('g')
-        .attr('class', 'y axis')
-        .call(yAxis)
-        .append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', 6)
-        .attr('dy', '.71em')
-        .style('text-anchor', 'end')
-        .text('log2FoldChange');
-
-      const hexagonG = clipped.append('g')
-        .attr('class', 'hexagons')
-        .style('opacity', alpha);
-
-      clipped.append('g')
-        .attr('class', 'brush')
-        .call(brush);
-
-      const pointsG = clipped.append('g')
-        .attr('class', 'points');
-
-      clipped.select('.extent').on('dblclick', () => {
-        console.log('dblclick.extent');
-        xScale.domain(xExtent);
-        yScale.domain(yExtent);
-        zoomed();
-      });
-
-      function zoomOut() {
-        xScale.domain(xExtent);
-        yScale.domain(yExtent);
+      function zoomTo(x, y) {
+        xScale.domain(x);
+        yScale.domain(y);
+        $brush
+          .call(brush.clear())
+          .call(brush.event);
         zoomed();
       }
 
+      function zoomHome() {
+        zoomHistory.splice(0, zoomHistory.length);
+        return zoomTo(xExtent, yExtent);
+      }
+
       function zoomToExtent() {
+        const xd = xScale.domain();
+        const yd = yScale.domain();
+        zoomHistory.push([[xd[0], xd[1]], [yd[0], yd[1]]]);
         if (brush.empty()) {
-          return;
+          [xd[0], xd[1]] = xd.map(Math.log);
+          const dx = (xd[1] - xd[0]) / 4;
+          const dy = (yd[1] - yd[0]) / 4;
+          xd[0] += dx;
+          xd[1] -= dx;
+          yd[0] += dy;
+          yd[1] -= dy;
+          [xd[0], xd[1]] = xd.map(Math.exp);
+        } else {
+          [[xd[0], yd[0]], [xd[1], yd[1]]] = brush.extent();
         }
+        return zoomTo(xd, yd);
+      }
 
-        // console.log(zoom.translate());
-        // var x0, y0, x1, y1;
-        const [[x0, y0], [x1, y1]] = brush.extent();
-
-        // console.log('zoom', [x0, x1], [y0, y1]);
-
-        xScale.domain([x0, x1]);
-        yScale.domain([y0, y1]);
-
-        svg.selectAll('.brush').call(brush.clear());
-
-        //  zoom.translate([x0, y0]);
-        //  zoom.scale([x1 - x0, y1 - y0]);
-        zoomed();
+      function zoomOut() {
+        const z = (zoomHistory.length === 0) ? [xExtent, yExtent] : zoomHistory.pop();
+        return zoomTo.apply(this, z);
       }
 
       function zoomed() {
@@ -216,82 +276,96 @@ export default function Scatter(opts = {}) {
         container.select('g.x.axis').call(xAxis);
         container.select('g.y.axis').call(yAxis);
 
+        midLine
+          .attr('y1', yScale(0))
+          .attr('y2', yScale(0));
+
         if (showDensity) {
+          drawDensity();
           updateDensity();
         }
-        zoomPoints();
+        updatePoints();
       }
 
-      hexbin
-        .size([width, height]);
-
-      if (showDensity) {
-        updateDensity();
-      }
-
-      updatePoints();
-      zoomPoints();
-
-      svg.call(tooltips);
-
-      scatter.updatePoints = updatePoints;
-      scatter.zoomExtent = zoomToExtent;
-      scatter.zoomOut = zoomOut;
-
-      function updateDensity() {
+      function drawDensity() {
         const hexPath = hexbin
           .x(xMap)   // maps change on zoom, need to rebin
           .y(yMap)
           .hexagon(hsize);
 
+        hd = hexbin(d);
+
         const hexagon = hexagonG
           .selectAll('path')
-          .data(hexbin(d));
+          .data(hd);
 
         hexagon.enter().append('path')
-            .style('stroke-width', 1)
-            .style('stroke', 'white')
-            .style('stroke-opacity', 0.5)
+            // .style('stroke-width', 1)
+            // .style('stroke', 'white')
+            // .style('stroke-opacity', 0.5)
             ;
 
         hexagon
             .attr('d', hexPath)
             .attr('transform', d => `translate(${d.x},${d.y})`)
-            .style('stroke', d => hexColor(d.filter(cutoffFilter).length / d.length))
-            .style('fill', d => hexColor(d.filter(cutoffFilter).length / d.length))
+            // .style('stroke', d => hexColor(d.filter(cutoffFilter).length / d.length))
+            // .style('fill', d => hexColor(d.filter(cutoffFilter).length / d.length))
             // .style('stroke-opacity', showScatter ? 0.2 : d => hexOpacity(d.length / 4))
-            .style('fill-opacity', showScatter ? 0.2 : d => hexOpacity(d.length));
+            // .style('fill-opacity', showScatter ? 0.2 : d => hexOpacity(d.length))
+            ;
 
         hexagon.exit().remove();
       }
 
-      function zoomPoints() {
-        pointsG.selectAll('.point')
-          .attr('transform', d => `translate(${xMap(d)},${yMap(d)})`);
-      }
-
-      function updatePoints() {
+      function updateDensity() {
         hexagonG.style('opacity', alpha);
 
-        const dd = d.filter(d => {
+        hd.forEach(d => {
+          const len = d.length;
+          d.color = hexColor(d.filter(d => d.$cutoffCheck).length / len);
+          d.opacity = showScatter ? 0.2 : hexOpacity(len);
+        });
+
+        hexagonG
+          .selectAll('path')
+          .style('stroke', d => d.color)
+          .style('fill', d => d.color)
+          .style('fill-opacity', d => d.opacity);
+      }
+
+      function drawPoints() {
+        const ordinal = d3.scale.ordinal()
+          .domain(highlightDomain)
+          .range(highlightColor.range());
+
+        legendOrdinal
+          .scale(ordinal);
+
+        container.select('.legendOrdinal')
+          .call(legendOrdinal);
+
+        const dd = showScatter ? d : d.filter(d => d.$showPoint);
+
+        /* const dd = d.filter(d => {
           d.highlight = highlightFilter(d);
           return showScatter || d.highlight > -1;
-        });
+        }); */
 
         const points = pointsG.selectAll('.point')
             .data(dd);
 
         points.enter().append('circle')
             .attr('class', 'point')
-              .attr('x', 0)
-              .attr('y', 0)
-              .style('cursor', 'pointer')
-              .on('mouseover', tooltips.show)
-              .on('mouseout', tooltips.hide);
+            .attr('x', 0)
+            .attr('y', 0)
+            // .style('cursor', 'pointer')
+            .on('mouseover', tooltip.show)
+            .on('mouseout', tooltip.hide);
 
         points.exit().remove();
 
         points
+          .attr('class', d => d.$showPoint ? 'point highlight' : 'point')
           .attr('transform', d => `translate(${xMap(d)},${yMap(d)})`)
           .each(function (d) {
             const e = d3.select(this);
@@ -308,33 +382,39 @@ export default function Scatter(opts = {}) {
               e
                 .style('opacity', alpha)
                 .attr('r', 2)
-                .style('fill', cutoffFilter(d) ? 'red' : 'black');
+                .style('fill', d.$cutoffCheck ? 'red' : 'black');
             }
           });
+      }
 
-        if (showDensity) {
-          hexagonG
-            .selectAll('path')
-            .style('stroke', d => hexColor(d.filter(cutoffFilter).length / d.length))
-            .style('fill', d => hexColor(d.filter(cutoffFilter).length / d.length));
-        }
+      function updatePoints() {
+        pointsG.selectAll('.point')
+          .attr('transform', d => `translate(${xMap(d)},${yMap(d)})`);
       }
     });
   }
 
-  scatter.cutoffFilter = function (_) {
+  /* scatter.cutoffFilter = function (_) {
     if (arguments.length < 1) {
       return cutoffFilter;
     }
     cutoffFilter = _;
     return scatter;
-  };
+  }; */
 
-  scatter.highlightFilter = function (_) {
+  /* scatter.highlightFilter = function (_) {
     if (arguments.length < 1) {
       return highlightFilter;
     }
     highlightFilter = _;
+    return scatter;
+  }; */
+
+  scatter.highlightDomain = function (_) {
+    if (arguments.length < 1) {
+      return highlightDomain;
+    }
+    highlightDomain = _;
     return scatter;
   };
 
