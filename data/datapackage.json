@@ -1,10 +1,51 @@
 {
 	"resources": [
 		{
-			"name": "index",
-			"path": "./index.tsv",
-			"hide": true
+			"name": "Index",
+      "description": "Index of DESeq2 and edgeR data files",
+			"path": "./index.tsv"
 		},
-		"./DESeq2.bound_vs_unbound.tsv"
-	]
+    {
+      "comment": "Initial data file to load in DEIVA",
+      "description": "DESeq2 or edgeR data file",
+      "path": "./DESeq2.bound_vs_unbound.tsv",
+			"schema": "deseq2"
+    }
+	],
+	"schemas": {
+    "deseq2oredgeR": {
+      "fields": [
+        {"name": "feature","type": "string", "constraints": {"required": true}},
+        {"name": "symbol", "type": "string"},
+        {"name": "baseMean", "type": "number"},
+        {"name": "log2FoldChange", "type": "number", "missingValues": ["-", "NA"]},
+        {"name": "pvalue", "type": "number", "missingValues": ["-", "NA"]},
+        {"name": "padj", "type": "number", "missingValues": ["-", "NA"]},
+        {"name": "logFC", "type": "number"},
+        {"name": "logCPM", "type": "number", "missingValues": ["-", "NA"]},
+        {"name": "PValue", "type": "number", "missingValues": ["-", "NA"]},
+        {"name": "FDR", "type": "number", "missingValues": ["-", "NA"]}
+      ]
+    },
+		"deseq2": {
+			"fields": [
+        {"name": "feature","type": "string", "constraints": {"required": true}},
+        {"name": "symbol", "type": "string"},
+        {"name": "baseMean", "type": "number", "constraints": {"required": true}},
+        {"name": "log2FoldChange", "type": "number", "missingValues": ["-", "NA"], "constraints": {"required": true}},
+				{"name": "pvalue", "type": "number", "missingValues": ["-", "NA"], "constraints": {"required": true}},
+        {"name": "padj", "type": "number", "missingValues": ["-", "NA"], "constraints": {"required": true}}
+			]
+		},
+    "edgeR": {
+      "fields": [
+        {"name": "feature","type": "string", "constraints": {"required": true}},
+        {"name": "logFC", "type": "number", "missingValues": ["-", "NA"], "constraints": {"required": true}},
+        {"name": "logCPM", "type": "number", "constraints": {"required": true}},
+        {"name": "PValue", "type": "number", "missingValues": ["-", "NA"], "constraints": {"required": true}},
+        {"name": "FDR", "type": "number", "missingValues": ["-", "NA"], "constraints": {"required": true}},
+        {"name": "symbol", "type": "string"}
+      ]
+    }
+	}
 }
