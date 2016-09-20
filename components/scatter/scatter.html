@@ -39,7 +39,7 @@
             </ui-select-no-choice>
             <ui-select-match placeholder="Select genes...">
               {{::$item.symbol}}
-              <span class="badge" ng-style="{ backgroundColor: main.colorScale($index) }">
+              <span class="badge" ng-style="{ backgroundColor: main.plotState.colorScale($index) }">
                 <small>
                   {{::$item.count}}
                 </small>
@@ -74,14 +74,14 @@
           <div id="filters" class="row clear">
             <div id="fc-filter" class="col-md-12 col-xs-6">
               <label>abs. log2FoldChange &gt; </label>
-              <input type="number" class="form-control input-sm" ng-model="main.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
-              <rzslider rz-slider-model="main.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
+              <input type="number" class="form-control input-sm" ng-model="main.plotState.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
+              <rzslider rz-slider-model="main.plotState.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
             </div>
 
             <div id="fdr-filter" class="col-md-12 col-xs-6">
-              <label>AND FDR &le; </label>
-              <input type="number" class="form-control input-sm" ng-model="main.logpcut" min="-5" max="0" step="0.1" ng-change="main.update()"/>
-              <rzslider rz-slider-model="main.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
+              <label>AND log10 FDR &le; </label>
+              <input type="number" class="form-control input-sm" ng-model="main.plotState.logpcut" min="-5" max="0" step="0.1" ng-change="main.update()"/>
+              <rzslider rz-slider-model="main.plotState.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
             </div>
 
             <div id="fdr-filter" class="col-md-12 text-right">
@@ -94,12 +94,19 @@
             </div>
 
             <div class="col-md-12 col-xs-6">
-              <rzslider rz-slider-model="main.alpha" rz-slider-options="main.fcAlphaSlider"></rzslider>
+              <rzslider rz-slider-model="main.plotState.alpha" rz-slider-options="main.fcAlphaSlider"></rzslider>
+            </div>
+
+            <div id="plot-field" class="col-md-12 col-xs-6">
+              <label>Field:</label>
+              <input type="radio" name="hex" value="hex" checked ng-model="main.plotState.plot" ng-change="main.draw()"> Hexplot
+              <input type="radio" name="scatter" value="scatter" ng-model="main.plotState.plot" ng-change="main.draw()"> Scatterplot
             </div>
 
             <div id="plot-type" class="col-md-12 col-xs-6">
-              <input type="radio" name="hex" value="hex" checked ng-model="main.plot" ng-change="main.draw()"> Hexplot
-              <input type="radio" name="scatter" value="scatter" ng-model="main.plot" ng-change="main.draw()"> Scatterplot
+              <label>Type:</label>
+              <input type="radio" name="MA" value="MA" checked ng-model="main.plotState.plotType" ng-change="main.draw()"> MA-plot
+              <input type="radio" name="Volcano" value="Volcano" ng-model="main.plotState.plotType" ng-change="main.draw()"> Volcano
             </div>
           </div>
         </form>
@@ -109,10 +116,11 @@
     <div class="col-md-9" on-resize="main.draw()">
       <div class="well chart-height chart-well">
         <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar" role="group" aria-label="toolbar">
-          <!-- button class="btn btn-sm btn-default" svg-download="#_scatter__chart" title="Download SVG" ng-disabled="!main.editorOptions.enableSvgDownload">
-            <i class="fa fa-camera" aria-hidden="true"></i>
-          </button -->
-          <button type="button" class="btn btn-sm btn-default" ng-click="main.chartAction('zoomExtent')" title="zoom in">
+          <button type="button" class="btn btn-sm btn-default" ng-disabled="main.chart.brush.empty()" ng-click="main.chartAction('zoomExtent')" title="zoom to selection">
+            <i class="fa fa-plus-square-o" aria-hidden="true"></i>
+          </button>
+
+          <button type="button" class="btn btn-sm btn-default" ng-click="main.chartAction('zoomIn')" title="zoom in">
             <i class="fa fa-search-plus" aria-hidden="true"></i>
           </button>
 
@@ -121,7 +129,7 @@
           </button>
 
           <button type="button" class="btn btn-default" ng-click="main.chartAction('zoomHome')" title="zoom home">
-            <i class="fa fa-home" aria-hidden="true"></i>
+            <i class="fa fa-arrows-alt" aria-hidden="true"></i>
           </button>
         </div>
 
