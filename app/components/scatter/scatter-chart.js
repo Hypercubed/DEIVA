@@ -12,26 +12,35 @@ import './scatter-chart.css!';
 
 export default function Scatter(opts = {}) {
   const margin = opts.margin || {top: 20, right: 20, bottom: 30, left: 40};
+
   let width = (opts.width || 1024) - margin.left - margin.right;
-  const height = (opts.height || 500) - margin.top - margin.bottom;
+  let height = (opts.height || 500) - margin.top - margin.bottom;
+
   const title = opts.title || 'DEIVA';
   let alpha = 0.1;
 
   let showScatter = false;
   let showDensity = true;
 
-  const xTickFormat = d3.format('g');
+  // const xTickFormat = d3.format('g');
   const labelFormat = d3.format('1.3f');
+  const expFormat = d3.format('.0e');
+  // const superscript = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  /* const formatPower = d => {
+    const x = Math.abs(d);
+    const sgn = (x > 0) ? '' : '-';
+    return sgn + String(x).split('').map(c => superscript[c]).join('');
+  }; */
+  // const powerOfTen = d => Math.abs(d) / Math.pow(10, Math.ceil(Math.log10(Math.abs(d)) - 1e-12)) === 1;
 
-  const xValue = d => (Number(d.baseMean) || 0.01); // data -> value
-  const xScale = d3.scale.log().range([0, width]); // value -> display
+  let xValue = opts.xValue || (d => Number(d.baseMean) || 0.01); // data -> value
+  let xLabel = opts.xLabel || 'baseMean';
+  const xScale = d3.scale.linear().range([0, width]).nice(); // value -> display
   const xMap = d => xScale(xValue(d)); // data -> display
-  const xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(d => {
-    const x = Math.log10(d) + 1e-6;
-    return Math.abs(x - Math.floor(x)) < 0.1 ? xTickFormat(d) : '';
-  });
+  const xAxis = d3.svg.axis().scale(xScale).orient('bottom'); // .tickFormat(null);
 
-  const yValue = d => Number(d.log2FoldChange) || 0; // data -> value
+  let yValue = opts.yValue || (d => Number(d.log2FoldChange) || 0); // data -> value
+  let yLabel = opts.yLabel || 'log2FoldChange';
   const yScale = d3.scale.linear().range([height, 0]); // value -> display
   const yMap = d => yScale(yValue(d)); // data -> display
   const yAxis = d3.svg.axis().scale(yScale).orient('left'); // .tickFormat(yTickFormat);
@@ -65,12 +74,13 @@ export default function Scatter(opts = {}) {
   const tooltipHtml = d => `
     <p>
       ${d.symbol}
-      </br />
+      <br />
       ${d.feature}
     </p>
     baseMean: ${labelFormat(d.baseMean)}<br />
     log2FoldChange: ${labelFormat(d.log2FoldChange)}<br />
-    Adjusted p-value: ${labelFormat(d.padj)}`;
+    P-Value:  ${expFormat(d.pvalue)}<br />
+    FDR: ${expFormat(d.padj)}`;
 
   const tooltip = tip()
     .attr('class', 'd3-tip d3-tip-scatter' + (showScatter ? '' : ' animate'))
@@ -89,12 +99,8 @@ export default function Scatter(opts = {}) {
       const xExtent = d3.extent(d, xValue);
       const yExtent = d3.extent(d, yValue);
 
-      const zoomHistory = [];
-
-      let hd = null;
-
-      xExtent[1] *= 2;
-      xExtent[0] /= 2;
+      xExtent[0] = Math.floor(xExtent[0]);
+      xExtent[1] = Math.ceil(xExtent[1]);
 
       const h = yExtent[1] - yExtent[0];
 
@@ -103,6 +109,10 @@ export default function Scatter(opts = {}) {
 
       xScale.domain(xExtent).range([0, width]);
       yScale.domain(yExtent);
+
+      const zoomHistory = [];
+
+      let hd = null;
 
       zoom
         .x(xScale)
@@ -139,7 +149,7 @@ export default function Scatter(opts = {}) {
           .attr('x', width)
           .attr('dy', '-.71em')
           // .style('text-anchor', 'end')
-          .text('baseMean');
+          .text(xLabel);
 
       container.append('g')
         .attr('class', 'y axis')
@@ -149,7 +159,7 @@ export default function Scatter(opts = {}) {
         .attr('y', 6)
         .attr('dy', '.71em')
         // .style('text-anchor', 'end')
-        .text('log2FoldChange');
+        .text(yLabel);
 
       const hexagonG = clipped.append('g')
         .attr('class', 'hexagons')
@@ -172,7 +182,7 @@ export default function Scatter(opts = {}) {
 
       container.append('g')
         .attr('class', 'legendOrdinal')
-        .attr('transform', 'translate(30,20)');
+        .attr('transform', `translate(${width + 10},10)`);
 
       const legendOrdinal = legend.color()
         .shape('circle')
@@ -188,6 +198,7 @@ export default function Scatter(opts = {}) {
 
       scatter.updatePoints = update;
       scatter.zoomExtent = zoomToExtent;
+      scatter.zoomIn = zoomIn;
       scatter.zoomOut = zoomOut;
       scatter.zoomHome = zoomHome;
 
@@ -246,21 +257,30 @@ export default function Scatter(opts = {}) {
       }
 
       function zoomToExtent() {
+        if (brush.empty()) {
+          return;
+        }
         const xd = xScale.domain();
         const yd = yScale.domain();
         zoomHistory.push([[xd[0], xd[1]], [yd[0], yd[1]]]);
-        if (brush.empty()) {
-          [xd[0], xd[1]] = xd.map(Math.log);
-          const dx = (xd[1] - xd[0]) / 4;
-          const dy = (yd[1] - yd[0]) / 4;
-          xd[0] += dx;
-          xd[1] -= dx;
-          yd[0] += dy;
-          yd[1] -= dy;
-          [xd[0], xd[1]] = xd.map(Math.exp);
-        } else {
-          [[xd[0], yd[0]], [xd[1], yd[1]]] = brush.extent();
-        }
+        [[xd[0], yd[0]], [xd[1], yd[1]]] = brush.extent();
+        return zoomTo(xd, yd);
+      }
+
+      function zoomIn() {
+        const xd = xScale.domain();
+        const yd = yScale.domain();
+        zoomHistory.push([[xd[0], xd[1]], [yd[0], yd[1]]]);
+
+        // [xd[0], xd[1]] = xd.map(Math.log);
+        const dx = (xd[1] - xd[0]) / 4;
+        const dy = (yd[1] - yd[0]) / 4;
+        xd[0] += dx;
+        xd[1] -= dx;
+        yd[0] += dy;
+        yd[1] -= dy;
+        // [xd[0], xd[1]] = xd.map(Math.exp);
+
         return zoomTo(xd, yd);
       }
 
@@ -378,10 +398,13 @@ export default function Scatter(opts = {}) {
 
               moveToFront.call(this);
             } else {
+              const stroke = d.$cutoffCheck ? 'red' : 'black';
+              const fill = isNaN(d.padj) ? 'white' : stroke;
               e
                 .style('opacity', alpha)
                 .attr('r', 2)
-                .style('fill', d.$cutoffCheck ? 'red' : 'black');
+                .style('stroke', stroke)
+                .style('fill', fill);
             }
           });
       }
@@ -392,6 +415,38 @@ export default function Scatter(opts = {}) {
       }
     });
   }
+
+  scatter.x = function (_) {
+    if (arguments.length < 1) {
+      return xValue;
+    }
+    xValue = _;
+    return scatter;
+  };
+
+  scatter.y = function (_) {
+    if (arguments.length < 1) {
+      return yValue;
+    }
+    yValue = _;
+    return scatter;
+  };
+
+  scatter.xLabel = function (_) {
+    if (arguments.length < 1) {
+      return xLabel;
+    }
+    xLabel = _;
+    return scatter;
+  };
+
+  scatter.yLabel = function (_) {
+    if (arguments.length < 1) {
+      return yLabel;
+    }
+    yLabel = _;
+    return scatter;
+  };
 
   /* scatter.cutoffFilter = function (_) {
     if (arguments.length < 1) {
@@ -438,6 +493,14 @@ export default function Scatter(opts = {}) {
       return width;
     }
     width = (_ || 1024) - margin.left - margin.right;
+    return scatter;
+  };
+
+  scatter.height = function (_) {
+    if (arguments.length < 1) {
+      return height;
+    }
+    height = (_ || 500) - margin.left - margin.right;
     return scatter;
   };
 

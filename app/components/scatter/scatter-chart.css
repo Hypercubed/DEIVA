@@ -1,5 +1,10 @@
 ._scatter .axis text {
+  font-size: 12px;
   text-anchor: end;
+}
+
+._scatter .superscript {
+  font-size: 8px;
 }
 
 ._scatter .axis path,
@@ -12,6 +17,7 @@
 ._scatter circle.point {
   cursor: pointer;
   stroke: none;
+  stroke-width: 1px;
 }
 
 ._scatter circle.highlight,
@@ -53,7 +59,7 @@ g.hexagons path {
 
 @media (min-width: 992px) {
   .chart-height {
-    height: 550px;
+    height: 580px;
     overflow-y: auto;
   }
 }

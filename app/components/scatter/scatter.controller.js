@@ -90,7 +90,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   const chart = new ScatterChart({
     width: parseInt($chart.style('width'), 10),
     height: 500,
-    margin: {top: 10, right: 30, bottom: 30, left: 40},
+    margin: {top: 10, right: 100, bottom: 30, left: 40},
     highlightColor: colorScale
   });
 
@@ -142,11 +142,11 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     floor: -5,
     ceil: 0,
     step: 1,
-    onEnd: () => {
-      main.pcut = Math.pow(10, Number(main.logpcut));
-      updateChartData();
-    },
-    translate: value => `1e${value}`
+    onEnd: updateChartData // () => {
+      // main.plotState.pcut = Math.pow(10, Number(main.plotState.logpcut));
+      // updateChartData();
+    // } // ,
+    // translate: value => `1e${value}`
   };
 
   // debounced functions
@@ -181,14 +181,23 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     },
     gene: main.dataPackage.resources[0].data[0].gene,
     geneList: [],
-    pcut: 0.1,
+    plotState: {
+      // pcut: 0.1,
+      fccut: 0,
+      logpcut: -1,
+      alpha: 0.8,
+      plot: 'hex',
+      plotType: 'MA',
+      colorScale // maybe shouldn't be state
+    },
+    /* pcut: 0.1,
     fccut: 0,
     logpcut: -1,
     alpha: 0.8,
-    plot: 'hex',
+    plot: 'hex', */
     selectedData: main.dataPackage.resources[0].data[0],
     upDown: [0, 0],
-    colorScale,
+    // colorScale,
     dataState,
     introOptions,
     dropped,
@@ -234,18 +243,29 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   function updateList() {
     $log.debug('update list');
     if (chart.brush.empty()) {
-      dataState.byBaseMean.filterRange([0.01, Infinity]);
-      dataState.byLog2FoldChange.filterRange([-Infinity, Infinity]);
-
-      main.gridOptions.data = dataState.byLog2FoldChange.top(Infinity);
+      dataState.byPvalue.filterAll();
+      dataState.byBaseMean.filterAll();
+      dataState.byLog2FoldChange.filterAll();
     } else {
       const extent = chart.brush.extent();
 
-      dataState.byBaseMean.filterRange([extent[0][0], extent[1][0]]);
-      dataState.byLog2FoldChange.filterRange([extent[0][1], extent[1][1]]);
+      if (main.plotState.plotType === 'MA') {
+        extent[0][0] = Math.pow(10, extent[0][0]);
+        extent[1][0] = Math.pow(10, extent[1][0]);
+        dataState.byBaseMean.filterRange([extent[0][0], extent[1][0]]);
+        dataState.byPvalue.filterAll();
+      } else {
+        console.log(extent[0][0], extent[1][0]);
+        extent[0][0] = Math.pow(10, -extent[0][0]);
+        extent[1][0] = Math.pow(10, -extent[1][0]);
+        console.log(extent[0][0], extent[1][0]);
+        dataState.byBaseMean.filterAll();
+        dataState.byPvalue.filterRange([extent[1][0], extent[0][0]]);
+      }
 
-      main.gridOptions.data = dataState.byLog2FoldChange.top(Infinity);
+      dataState.byLog2FoldChange.filterRange([extent[0][1], extent[1][1]]);
     }
+    main.gridOptions.data = dataState.byLog2FoldChange.top(Infinity);
   }
 
   function setupChart() {
@@ -253,8 +273,8 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       return;  // not sure why I need this.
     }
 
-    const pcut = Math.pow(10, Number(main.logpcut));
-    const fccut = main.fccut;
+    const pcut = Math.pow(10, Number(main.plotState.logpcut));
+    const fccut = main.plotState.fccut;
     const cutoffCheck = d => d.padj <= pcut && (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
 
     const genesSearch = main.geneList.map(x => x.symbol);
@@ -277,12 +297,26 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       return d.$cutoffCheck;
     });
 
+    const x = {
+      MA: d => Math.log10(d.baseMean),
+      Volcano: d => -Math.log10(d.pvalue || 1)
+    };
+
+    const xLabel = {
+      MA: 'log10 baseMean',
+      Volcano: '-log10 P-Value'
+    };
+
     chart
-      .showScatter(main.plot === 'scatter')
-      .showDensity(main.plot === 'hex')
+      .x(x[main.plotState.plotType])
+      .y(d => d.log2FoldChange || 0)
+      .xLabel(xLabel[main.plotState.plotType])
+      .yLabel('log2FoldChange')
+      .showScatter(main.plotState.plot === 'scatter')
+      .showDensity(main.plotState.plot === 'hex')
       // .highlightFilter(geneCheck)
       .highlightDomain(genesSearch)
-      .alpha(main.alpha)
+      .alpha(main.plotState.alpha)
       .width(parseInt($chart.style('width'), 10))
       // .cutoffFilter(cutoffCheck)
       ;
@@ -356,8 +390,11 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     // new data, new cross filter
     const cf = crossfilter(data);
 
+    dataState.byPvalue = cf.dimension(d => d.pvalue)
+      .filterRange([0, Infinity]);
+
     dataState.byBaseMean = cf.dimension(d => d.baseMean)
-      .filterRange([0.01, Infinity]);
+      .filterRange([0, Infinity]);
 
     dataState.byLog2FoldChange = cf.dimension(d => d.log2FoldChange)
       .filterRange([-Infinity, Infinity]);
@@ -410,12 +447,22 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   }
 
   function addSymbols(list) {
+    const missing = [];
     list.split(/[\s;]/).forEach(symbol => {
       const item = main.uniqGeneMap[symbol];
-      if (item && !main.geneList.includes(item)) {
-        main.geneList.push(item);
+      if (item) {
+        if (!main.geneList.includes(item)) {
+          main.geneList.push(item);
+        }
+      } else {
+        missing.push(symbol);
       }
     });
+    if (missing.length > 0) {
+      const msg = missing.join(', ');
+      console.error('Genes not found', msg);
+      growl.error(msg, {title: 'Genes not found'});
+    }
   }
 
   function selectFile(file) {

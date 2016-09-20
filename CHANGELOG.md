@@ -12,6 +12,8 @@ CHANGELOG
 * Various performance improvements
 * Added zoom-out and improved zoom-in
 * Added legend to chart
+* added volcano plot
+* improved x-axis display
 
 --------------------
 
