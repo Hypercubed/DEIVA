@@ -87,6 +87,16 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   const $chart = d3.select('#_scatter__chart');
   const colorScale = d3.scale.category10();
 
+  const x = {
+    MA: d => Math.log10(d.baseMean),
+    Volcano: d => -Math.log10(d.pvalue || 1)
+  };
+
+  const xLabel = {
+    MA: 'log10 baseMean',
+    Volcano: '-log10 P-Value'
+  };
+
   const chart = new ScatterChart({
     width: parseInt($chart.style('width'), 10),
     height: 500,
@@ -297,16 +307,6 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       return d.$cutoffCheck;
     });
 
-    const x = {
-      MA: d => Math.log10(d.baseMean),
-      Volcano: d => -Math.log10(d.pvalue || 1)
-    };
-
-    const xLabel = {
-      MA: 'log10 baseMean',
-      Volcano: '-log10 P-Value'
-    };
-
     chart
       .x(x[main.plotState.plotType])
       .y(d => d.log2FoldChange || 0)
@@ -353,6 +353,17 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     $log.debug('processData');
     const resource = main.dataPackage.resources[1];
 
+    const sample = resource.data[0];
+    const fields = Object.keys(sample);
+
+    /* if (typeof sample.baseMean === 'undefined' && typeof sample.logCPM !== 'undefined') {
+      x.MA = d => d.logCPM;
+      xLabel.MA = 'logCPM';
+    } else {
+      x.MA = d => Math.log10(d.baseMean);
+      xLabel.MA = 'log10 baseMean';
+    } */
+
     const data = resource.data.filter(d => {
       d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
       delete d.PValue;
@@ -360,7 +371,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
       delete d.FDR;
 
-      d.baseMean = Number(d.baseMean) || Number(d.logCPM) || 0.001;  // Base Mean
+      d.baseMean = Number(d.baseMean) || Math.exp(Number(d.logCPM)) || 0.001;  // Base Mean
       delete d.logCPM;
 
       d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
@@ -402,7 +413,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     main.gridOptions.data = dataState.data = dataState.byBaseMean.top(Infinity);
     main.gridOptions.columnDefs = columnDefs.slice();
 
-    Object.keys(dataState.data[0]).forEach(key => {
+    fields.forEach(key => {
       if (!ignoredKeys.includes(key)) {
         main.gridOptions.columnDefs.push({name: key, visible: false});
       }
