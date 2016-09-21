@@ -4,13 +4,7 @@
 			"name": "Index",
       "description": "Index of DESeq2 and edgeR data files",
 			"path": "./index.tsv"
-		},
-    {
-      "comment": "Initial data file to load in DEIVA",
-      "description": "DESeq2 or edgeR data file",
-      "path": "./DESeq2.bound_vs_unbound.tsv",
-			"schema": "deseq2"
-    }
+		}
 	],
 	"schemas": {
     "deseq2oredgeR": {
