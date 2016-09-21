@@ -1,5 +1,19 @@
 
+@media (min-width: 992px) {
+  .chart-height {
+    height: 580px;
+    overflow-y: auto;
+  }
+}
 
+.expression-grid {
+  font-size: 12px;
+}
+
+.introjs-tooltip {
+  min-width: 200px;
+  max-width: 500px !important;
+}
 
 /* disable menu animation */
 .ui-grid-menu-mid {
@@ -9,4 +23,102 @@
 
 .file-dropzone.hover {
   outline: 2px dashed grey;
+}
+
+.fa-stack.zoom-extent {
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+}
+
+.fa-stack.zoom-extent .fa-square-o {
+  left: -3px;
+  top: -3px;
+  width: 0.5em;
+}
+
+.chart-well {
+  position: relative;
+}
+
+.chart-toolbar {
+  font-size: 14px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+._scatter {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+._scatter .spinner-icon {
+  opacity: 0;
+  transition: opacity linear .3s;
+  -webkit-transition-delay: 0.1s;
+  transition-delay: 0.1s;
+}
+
+._scatter.dirty .spinner-icon {
+  position:absolute;
+  left:50%;
+  margin-left:-14px;
+  top:50%;
+  margin-top:-15px;
+  width: 28px;
+  height: 28px;
+
+  border: solid 4px transparent;
+  border-top-color:  #29d;
+  border-left-color: #29d;
+  border-radius: 50%;
+
+  opacity: 1;
+  transition: opacity linear .3s;
+  -webkit-transition-delay: 0.1s;
+  transition-delay: 0.1s;
+
+  -webkit-animation: loading-bar-spinner 400ms linear infinite;
+  -moz-animation:    loading-bar-spinner 400ms linear infinite;
+  -ms-animation:     loading-bar-spinner 400ms linear infinite;
+  -o-animation:      loading-bar-spinner 400ms linear infinite;
+  animation:         loading-bar-spinner 400ms linear infinite;
+}
+
+._scatter.dirty svg {
+  opacity: 0.5;
+  transition: opacity linear .3s;
+  -webkit-transition-delay: 0.1s;
+  transition-delay: 0.1s;
+}
+
+._scatter.hover svg {
+  opacity: 0.5;
+}
+
+._scatter.hover {
+  outline: 2px dashed grey;
+}
+
+.drop-here {
+  position:absolute;
+  left:0;
+  margin-left:0;
+  top:0;
+  margin-top:0;
+  width:100%;
+  height:100%;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:30px;
+
+  visibility: hidden;
+}
+
+._scatter.hover .drop-here {
+  visibility: visible;
 }

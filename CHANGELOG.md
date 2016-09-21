@@ -14,6 +14,10 @@ CHANGELOG
 * Added legend to chart
 * added volcano plot
 * improved x-axis display
+* Modified chart layout
+* Improved chart tool bar readability
+* Improved intro text
+* EdgeR files now display the correct x-axis label
 
 --------------------
 

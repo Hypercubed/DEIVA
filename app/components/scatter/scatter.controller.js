@@ -8,8 +8,9 @@ import Clipboard from 'clipboard';
 
 // import dp from 'common/services/datapackage/datapackage';
 
-import introData from './intro.json!';
-import aboutHTML from './intro.md!';
+import steps from './intro.json!';
+import hello from './intro.md!';
+import thankYou from './intro-end.md!';
 
 import ScatterChart from './scatter-chart';
 
@@ -58,16 +59,12 @@ const gridOptions = {
   exporterMenuAllData: false
 };
 
+steps[0].intro = hello;
+steps[steps.length - 1].intro = thankYou;
+
 // setup intro
 const introOptions = {
-  steps: [
-    {
-      element: '#charts',
-      intro: aboutHTML,
-      position: 'floating'
-    },
-    ...introData
-  ],
+  steps,
   showStepNumbers: false,
   exitOnOverlayClick: true,
   exitOnEsc: true
@@ -82,6 +79,8 @@ const sliderOpts = {
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
 function controller($scope, dataService, $log, $timeout, growl) {  // eslint-disable-line max-params
   const main = this;
+
+  let isEdgeR = false;
 
   // chart
   const $chart = d3.select('#_scatter__chart');
@@ -99,13 +98,10 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
 
   const chart = new ScatterChart({
     width: parseInt($chart.style('width'), 10),
-    height: 500,
-    margin: {top: 10, right: 100, bottom: 30, left: 40},
+    height: 530,
+    margin: {top: 30, right: 100, bottom: 40, left: 40},
     highlightColor: colorScale
   });
-
-  // data
-  const dataState = {};
 
   // clipboard
   const clipboard = new Clipboard('#clipboard-btn', {
@@ -163,7 +159,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   const δdrawChart = _.debounce(() => {
     $chart.selectAll('svg').remove();
 
-    $chart.datum(dataState.data)
+    $chart.datum(main.dataState.data)
       .call(chart);
 
     $chart.classed('dirty', false);
@@ -200,15 +196,10 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       plotType: 'MA',
       colorScale // maybe shouldn't be state
     },
-    /* pcut: 0.1,
-    fccut: 0,
-    logpcut: -1,
-    alpha: 0.8,
-    plot: 'hex', */
     selectedData: main.dataPackage.resources[0].data[0],
     upDown: [0, 0],
     // colorScale,
-    dataState,
+    dataState: {},
     introOptions,
     dropped,
     selectFile,
@@ -236,6 +227,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
 
   function loadDataset(set) {
     dataService.loadResource(main.dataPackage, {
+      title: set.name,
       path: set.filename,
       schema: main.dataPackage.schemas.deseq2oredgeR
     })
@@ -252,34 +244,38 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
 
   function updateList() {
     $log.debug('update list');
+
+    const xFilter = (isEdgeR) ? main.dataState.byLogCPM : main.dataState.byBaseMean;
+    const yFilter = main.dataState.byLog2FoldChange;
+    const pFilter = main.dataState.byPvalue;
+
     if (chart.brush.empty()) {
-      dataState.byPvalue.filterAll();
-      dataState.byBaseMean.filterAll();
-      dataState.byLog2FoldChange.filterAll();
+      xFilter.filterAll();
+      pFilter.filterAll();
+      yFilter.filterAll();
     } else {
       const extent = chart.brush.extent();
 
       if (main.plotState.plotType === 'MA') {
-        extent[0][0] = Math.pow(10, extent[0][0]);
-        extent[1][0] = Math.pow(10, extent[1][0]);
-        dataState.byBaseMean.filterRange([extent[0][0], extent[1][0]]);
-        dataState.byPvalue.filterAll();
+        if (!isEdgeR) {
+          extent[0][0] = Math.pow(10, extent[0][0]);
+          extent[1][0] = Math.pow(10, extent[1][0]);
+        }
+        pFilter.filterAll();
+        xFilter.filterRange([extent[0][0], extent[1][0]]);
       } else {
-        console.log(extent[0][0], extent[1][0]);
         extent[0][0] = Math.pow(10, -extent[0][0]);
         extent[1][0] = Math.pow(10, -extent[1][0]);
-        console.log(extent[0][0], extent[1][0]);
-        dataState.byBaseMean.filterAll();
-        dataState.byPvalue.filterRange([extent[1][0], extent[0][0]]);
+        xFilter.filterAll();
+        pFilter.filterRange([extent[1][0], extent[0][0]]);
       }
-
-      dataState.byLog2FoldChange.filterRange([extent[0][1], extent[1][1]]);
+      yFilter.filterRange([extent[0][1], extent[1][1]]);
     }
-    main.gridOptions.data = dataState.byLog2FoldChange.top(Infinity);
+    main.gridOptions.data = yFilter.top(Infinity);
   }
 
   function setupChart() {
-    if (!dataState.data) {
+    if (!main.dataState.data) {
       return;  // not sure why I need this.
     }
 
@@ -300,18 +296,21 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       return -1;
     };
 
-    const d = dataState.data.filter(d => {  // update and filter by cutoff
+    const d = main.dataState.data.filter(d => {  // update and filter by cutoff
       d.$cutoffCheck = cutoffCheck(d);
       d.highlight = geneCheck(d);
       d.$showPoint = d.highlight > -1;
       return d.$cutoffCheck;
     });
 
+    const resource = main.dataPackage.resources[1];
+
     chart
       .x(x[main.plotState.plotType])
       .y(d => d.log2FoldChange || 0)
       .xLabel(xLabel[main.plotState.plotType])
       .yLabel('log2FoldChange')
+      .title(resource.title || resource.name)
       .showScatter(main.plotState.plot === 'scatter')
       .showDensity(main.plotState.plot === 'hex')
       // .highlightFilter(geneCheck)
@@ -354,15 +353,16 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     const resource = main.dataPackage.resources[1];
 
     const sample = resource.data[0];
-    const fields = Object.keys(sample);
 
-    /* if (typeof sample.baseMean === 'undefined' && typeof sample.logCPM !== 'undefined') {
+    isEdgeR = typeof sample.baseMean === 'undefined' && typeof sample.logCPM !== 'undefined';
+
+    if (isEdgeR) {
       x.MA = d => d.logCPM;
       xLabel.MA = 'logCPM';
     } else {
       x.MA = d => Math.log10(d.baseMean);
       xLabel.MA = 'log10 baseMean';
-    } */
+    }
 
     const data = resource.data.filter(d => {
       d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
@@ -371,8 +371,12 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
       delete d.FDR;
 
-      d.baseMean = Number(d.baseMean) || Math.exp(Number(d.logCPM)) || 0.001;  // Base Mean
-      delete d.logCPM;
+      if (isEdgeR) {
+        d.baseMean = Math.pow(2, Number(d.logCPM)) || 0.001;
+        d.logCPM = Number(d.logCPM);
+      } else {
+        d.baseMean = Number(d.baseMean) || 0.001;
+      }
 
       d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
       delete d.logFC;
@@ -387,6 +391,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       'pvalue',
       'padj',
       'baseMean',
+      'logCPM',
       'log2FoldChange',
       'symbols',
       'symbol',
@@ -401,25 +406,44 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     // new data, new cross filter
     const cf = crossfilter(data);
 
-    dataState.byPvalue = cf.dimension(d => d.pvalue)
-      .filterRange([0, Infinity]);
+    main.dataState = {};
 
-    dataState.byBaseMean = cf.dimension(d => d.baseMean)
-      .filterRange([0, Infinity]);
+    main.dataState.byPvalue = cf.dimension(d => d.pvalue)
+      .filterAll();
 
-    dataState.byLog2FoldChange = cf.dimension(d => d.log2FoldChange)
-      .filterRange([-Infinity, Infinity]);
+    if (isEdgeR) {
+      main.dataState.byLogCPM = cf.dimension(d => d.logCPM)
+        .filterAll();
+    } else {
+      main.dataState.byBaseMean = cf.dimension(d => d.baseMean)
+        .filterAll();
+    }
 
-    main.gridOptions.data = dataState.data = dataState.byBaseMean.top(Infinity);
+    main.dataState.byLog2FoldChange = cf.dimension(d => d.log2FoldChange)
+      .filterAll();
+
+    main.gridOptions.data = main.dataState.data = main.dataState.byLog2FoldChange.top(Infinity);
     main.gridOptions.columnDefs = columnDefs.slice();
 
-    fields.forEach(key => {
+    // switch baseMean for logCPM in table
+    if (isEdgeR) {
+      main.gridOptions.columnDefs[2] = {
+        name: 'logCPM',
+        displayName: 'log2 CPM',
+        type: 'number',
+        cellFilter: 'number',
+        enableFiltering: false
+      };
+    }
+
+    // add other fields to table
+    Object.keys(data[0]).forEach(key => {
       if (!ignoredKeys.includes(key)) {
-        main.gridOptions.columnDefs.push({name: key, visible: false});
+        main.gridOptions.columnDefs.push({name: key, displayName: key, visible: false});
       }
     });
 
-    $log.info('getting unique symbols');
+    $log.debug('getting unique symbols');
 
     const fullGeneList = [];
 
@@ -433,7 +457,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     fullGeneList
       .sort();
 
-    $log.info('done getting unique symbols', fullGeneList.length);
+    $log.debug('done getting unique symbols', fullGeneList.length);
 
     const uniqGeneMap = {};
     const uniqGeneList = [];
@@ -458,6 +482,9 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   }
 
   function addSymbols(list) {
+    if (typeof list !== 'string' || list.length === 0) {
+      return;
+    }
     const missing = [];
     list.split(/[\s;]/).forEach(symbol => {
       const item = main.uniqGeneMap[symbol];

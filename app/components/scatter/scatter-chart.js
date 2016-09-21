@@ -16,7 +16,7 @@ export default function Scatter(opts = {}) {
   let width = (opts.width || 1024) - margin.left - margin.right;
   let height = (opts.height || 500) - margin.top - margin.bottom;
 
-  const title = opts.title || 'DEIVA';
+  let title = opts.title || 'DEIVA';
   let alpha = 0.1;
 
   let showScatter = false;
@@ -35,7 +35,7 @@ export default function Scatter(opts = {}) {
 
   let xValue = opts.xValue || (d => Number(d.baseMean) || 0.01); // data -> value
   let xLabel = opts.xLabel || 'baseMean';
-  const xScale = d3.scale.linear().range([0, width]).nice(); // value -> display
+  const xScale = d3.scale.linear().range([0, width]); // value -> display
   const xMap = d => xScale(xValue(d)); // data -> display
   const xAxis = d3.svg.axis().scale(xScale).orient('bottom'); // .tickFormat(null);
 
@@ -71,16 +71,25 @@ export default function Scatter(opts = {}) {
     .y(yScale)
     .clamp(false);
 
-  const tooltipHtml = d => `
-    <p>
-      ${d.symbol}
-      <br />
-      ${d.feature}
-    </p>
-    baseMean: ${labelFormat(d.baseMean)}<br />
-    log2FoldChange: ${labelFormat(d.log2FoldChange)}<br />
-    P-Value:  ${expFormat(d.pvalue)}<br />
-    FDR: ${expFormat(d.padj)}`;
+  const tooltipHtml = d => {
+    const a =
+      `<p>
+        ${d.symbol}
+        <br />
+        ${d.feature}
+      </p>`;
+
+    const b = (typeof d.logCPM === 'undefined') ?
+      `baseMean: ${labelFormat(d.baseMean)}<br />` :
+      `logCPM: ${labelFormat(d.logCPM)}<br />`;
+
+    const c =
+      `log2FoldChange: ${labelFormat(d.log2FoldChange)}<br />
+      P-Value:  ${expFormat(d.pvalue)}<br />
+      FDR: ${expFormat(d.padj)}`;
+
+    return a + b + c;
+  };
 
   const tooltip = tip()
     .attr('class', 'd3-tip d3-tip-scatter' + (showScatter ? '' : ' animate'))
@@ -104,8 +113,8 @@ export default function Scatter(opts = {}) {
 
       const h = yExtent[1] - yExtent[0];
 
-      yExtent[1] += h / 20;
-      yExtent[0] -= h / 20;
+      yExtent[0] = Math.floor(yExtent[0] - (h / 20));
+      yExtent[1] = Math.ceil(yExtent[1] + (h / 20));
 
       xScale.domain(xExtent).range([0, width]);
       yScale.domain(yExtent);
@@ -135,6 +144,12 @@ export default function Scatter(opts = {}) {
           .attr('width', width)
           .attr('height', height);
 
+      svg.append('text')
+        .attr('class', 'title')
+        .attr('x', width / 2)
+        .attr('y', 0 - (margin.top / 2))
+        .text(title);
+
       const container = svg.append('g');
 
       const clipped = container.append('g')
@@ -145,8 +160,10 @@ export default function Scatter(opts = {}) {
         .attr('transform', `translate(0,${height})`)
         .call(xAxis)
         .append('text')
+          .attr('class', 'label')
           .attr('transform', 'rotate(0)')
-          .attr('x', width)
+          .attr('x', width / 2)
+          .attr('y', margin.bottom)
           .attr('dy', '-.71em')
           // .style('text-anchor', 'end')
           .text(xLabel);
@@ -155,10 +172,11 @@ export default function Scatter(opts = {}) {
         .attr('class', 'y axis')
         .call(yAxis)
         .append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', 6)
-        .attr('dy', '.71em')
-        // .style('text-anchor', 'end')
+          .attr('class', 'label')
+          .attr('transform', 'rotate(-90)')
+          .attr('y', -margin.left)
+          .attr('x', -height / 2)
+          .attr('dy', '.71em')
         .text(yLabel);
 
       const hexagonG = clipped.append('g')
@@ -415,6 +433,14 @@ export default function Scatter(opts = {}) {
       }
     });
   }
+
+  scatter.title = function (_) {
+    if (arguments.length < 1) {
+      return title;
+    }
+    title = _;
+    return scatter;
+  };
 
   scatter.x = function (_) {
     if (arguments.length < 1) {
