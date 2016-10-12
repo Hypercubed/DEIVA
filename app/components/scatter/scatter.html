@@ -1,14 +1,14 @@
-<div id="view" ng-intro-options="main.introOptions" ng-intro-method="CallMe" ng-intro-autostart="false">
+<div id="view" ng-intro-options="$ctrl.introOptions" ng-intro-method="CallMe" ng-intro-autostart="false">
 
-  <package-editor options="main.editorOptions">
+  <package-editor options="$ctrl.editorOptions">
     <div class="pull-right">
       <div class="btn-group">
-        <div class="file-dropzone" file-dropzone="text/plain,text/csv,text/tab-separated-values" data-max-file-size="30" dropped="main.dropped(file)">
+        <!-- div class="file-dropzone" file-dropzone="text/plain,text/csv,text/tab-separated-values" data-max-file-size="30" dropped="$ctrl.dropped(file)">
           <label id="data-drop" class="btn btn-primary btn-sm btn-file">
             Select file or Drag-and-Drop your own data here
-            <input type="file" on-read-file="main.dropped(file)" accept="text/plain,text/csv,text/tab-separated-values" data-max-file-size="30" style="display: none;" />
+            <input type="file" on-read-file="$ctrl.dropped(file)" accept="text/plain,text/csv,text/tab-separated-values" data-max-file-size="30" style="display: none;" />
           </label>
-        </div>
+        </div -->
       </div>
       <div class="btn-group">
         <button id="intro" type="button" class="btn btn-success btn-sm" ng-click="CallMe();">
@@ -18,138 +18,281 @@
     </div>
   </package-editor>
 
-  <div id="charts" class="container-fluid">
+  <div id="charts" class="container-fluid deiva-canvas">
 
-    <div class="col-md-3">
-      <div class="well chart-height">
-        <form>
-          <label>Dataset:</label>
-          <select id="data-set" class="form-control"
-            ng-options="option.name for option in main.dataPackage.resources[0].data track by option.filename"
-            ng-model="main.selectedData"
-            ng-change="main.loadDataset(main.selectedData)"></select>
-
-          <label>Locate symbol:</label>
-          <ui-select id="gene-select"
-              multiple theme="bootstrap" paste="main.pasteSymbols" tagging-tokens="SPACE|,|/"
-              ng-model="main.geneList"
-              ng-change="main.update()">
-            <ui-select-no-choice>
-              We couldn't find any matches...
-            </ui-select-no-choice>
-            <ui-select-match placeholder="Select genes...">
-              {{::$item.symbol}}
-              <span class="badge" ng-style="{ backgroundColor: main.plotState.colorScale($index) }">
-                <small>
-                  {{::$item.count}}
-                </small>
-              </span>
-            </ui-select-match>
-            <ui-select-choices repeat="gene in main.uniqGeneList | filter: $select.search | limitTo: 100 track by gene.symbol"
-                refresh-delay="1000"
-                ng-class="{ hide: $select.search.length < 1 }">
-                <span ng-bind-html="::gene.symbol | highlight: $select.search"></span>
-                <span class="badge">
-                  <small ng-bind="::gene.count">
-                  </small>
-                </span>
-            </ui-select-choices>
-          </ui-select>
-          <div class="row">
-            <div class="col-xs-12">
-              <div id="gene-list-toolbar" class="btn-group btn-group-xs pull-right">
-                <button id="clipboard-btn" class="btn btn-sm btn-default" title="Copy list to clipboard"
-                ng-disabled="main.geneList.length === 0">
-                  <i class="fa fa-clipboard" aria-hidden="true"></i>
-                </button>
-                <button class="btn btn-sm btn-default" title="Clear"
-                  ng-click="main.geneList = []; main.update()"
-                  ng-disabled="main.geneList.length === 0">
-                  <i class="fa fa-times" aria-hidden="true"></i>
-                </button>
+    <div class="row">
+      <form>
+        <uib-accordion class="col-md-3" close-others="false">
+          <div id="data-set" uib-accordion-group class="panel-default" is-open="$ctrl.uiState.dataset">
+            <uib-accordion-heading>
+              Dataset <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': $ctrl.uiState.dataset, 'glyphicon-chevron-right': !$ctrl.uiState.dataset}"></i>
+            </uib-accordion-heading>
+            <ui-select id="data-set"
+              theme="bootstrap"
+              ng-model="$ctrl.selectedData"
+              title="Choose an experiment"
+              ng-change="$ctrl.loadDataset($ctrl.selectedData)">
+              <ui-select-match placeholder="Enter an experiment...">
+                <small>{{$select.selected.name}}</small>
+              </ui-select-match>
+              <ui-select-choices repeat="value in $ctrl.dataPackage.resources[0].data | filter: $select.search track by value.filename">
+                <small ng-bind-html="value.name | highlight: $select.search"></small>
+              </ui-select-choices>
+            </ui-select>
+            <br />
+            <div class="">
+              <div class="file-dropzone" file-dropzone="text/plain,text/csv,text/tab-separated-values" data-max-file-size="30" dropped="$ctrl.dropped(file)">
+                <label id="data-drop" class="col-xs-12 btn btn-primary btn-sm btn-file">
+                  Select file or Drag-and-Drop your own data here
+                  <input type="file" on-read-file="$ctrl.dropped(file)" accept="text/plain,text/csv,text/tab-separated-values" data-max-file-size="30" style="display: none;" />
+                </label>
               </div>
             </div>
           </div>
-
-          <div id="filters" class="row clear">
+          <div uib-accordion-group class="panel-default" is-open="$ctrl.uiState.locate">
+            <uib-accordion-heading>
+              Locate <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': $ctrl.uiState.locate, 'glyphicon-chevron-right': !$ctrl.uiState.locate}"></i>
+            </uib-accordion-heading>
+            <ui-select id="gene-select"
+                multiple theme="bootstrap" paste="$ctrl.pasteSymbols" tagging-tokens="SPACE|,|/"
+                ng-model="$ctrl.geneList"
+                ng-change="$ctrl.update()">
+              <ui-select-no-choice>
+                We couldn't find any matches...
+              </ui-select-no-choice>
+              <ui-select-match placeholder="Select genes...">
+                {{::$item.symbol}}
+                <span class="badge" ng-style="{ backgroundColor: $ctrl.plotState.colorScale($index) }">
+                  <small>
+                    {{::$item.count}}
+                  </small>
+                </span>
+              </ui-select-match>
+              <ui-select-choices repeat="gene in $ctrl.uniqGeneList | filter: $select.search | limitTo: 100 track by gene.symbol"
+                  refresh-delay="1000"
+                  ng-class="{ hide: $select.search.length < 1 }">
+                  <span ng-bind-html="::gene.symbol | highlight: $select.search"></span>
+                  <span class="badge">
+                    <small ng-bind="::gene.count">
+                    </small>
+                  </span>
+              </ui-select-choices>
+            </ui-select>
+            <div class="row">
+              <div class="col-xs-12">
+                <div id="gene-list-toolbar" class="btn-group btn-group-xs pull-right">
+                  <button id="clipboard-btn" class="btn btn-sm btn-default" title="Copy list to clipboard"
+                  ng-disabled="$ctrl.geneList.length === 0">
+                    <i class="fa fa-clipboard" aria-hidden="true"></i>
+                  </button>
+                  <button class="btn btn-sm btn-default" title="Clear"
+                    ng-click="$ctrl.geneList = []; $ctrl.update()"
+                    ng-disabled="$ctrl.geneList.length === 0">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="filters" uib-accordion-group class="panel-default" is-open="$ctrl.uiState.filters">
+            <uib-accordion-heading>
+              Filters <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': $ctrl.uiState.filters, 'glyphicon-chevron-right': !$ctrl.uiState.filters}"></i>
+            </uib-accordion-heading>
             <div id="fc-filter" class="col-md-12 col-xs-6">
-              <label>abs. log2FoldChange &gt; </label>
-              <input type="number" class="form-control input-sm" ng-model="main.plotState.fccut" min="0" max="5" step="0.1" ng-change="main.update()"/>
-              <rzslider rz-slider-model="main.plotState.fccut" rz-slider-options="main.fcCutSlider"></rzslider>
+              <label><a href ng-click="$ctrl.uiState.fccut = !$ctrl.uiState.fccut">abs. log2FoldChange &gt; {{$ctrl.plotState.fccut}}</a></label>
+              <div uib-collapse="$ctrl.uiState.fccut">
+                <input type="number" class="form-control input-sm" ng-model="$ctrl.plotState.fccut" min="0" max="5" step="0.1" ng-change="$ctrl.update()"/>
+                <rzslider rz-slider-model="$ctrl.plotState.fccut" rz-slider-options="$ctrl.sliders.fccut"></rzslider>
+              </div>
             </div>
 
             <div id="fdr-filter" class="col-md-12 col-xs-6">
-              <label>AND log10 FDR &le; </label>
-              <input type="number" class="form-control input-sm" ng-model="main.plotState.logpcut" min="-5" max="0" step="0.1" ng-change="main.update()"/>
-              <rzslider rz-slider-model="main.plotState.logpcut" rz-slider-options="main.fdrCutSlider"></rzslider>
-            </div>
-          </div>
-          <div id="gene-count" class="row clear">
-            <div id="fdr-filter" class="col-md-12 text-right">
-              <label>Up: {{main.upDown[0]}}</label>
-              <label>Down: {{main.upDown[1]}}</label>
-            </div>
-          </div>
-          <div id="plot-options" class="row clear">
-            <div class="col-md-12">
-              <label>Plot</label>
+              <label><a href ng-click="$ctrl.uiState.logpcut = !$ctrl.uiState.logpcut">AND log10 FDR &le; {{$ctrl.plotState.logpcut}}</a></label>
+              <div uib-collapse="$ctrl.uiState.logpcut">
+                <input type="number" class="form-control input-sm" ng-model="$ctrl.plotState.logpcut" min="-5" max="0" step="0.1" ng-change="$ctrl.update()"/>
+                <rzslider rz-slider-model="$ctrl.plotState.logpcut" rz-slider-options="$ctrl.sliders.logpcut"></rzslider>
+              </div>
             </div>
 
+            <div id="A-filter" class="col-md-12 col-xs-6">
+              <label><a href ng-click="$ctrl.uiState.bmcut = !$ctrl.uiState.bmcut">AND {{$ctrl.xLabel.MA}} &gt; {{$ctrl.plotState.bmcut}}</a></label>
+              <div uib-collapse="$ctrl.uiState.bmcut">
+                <input type="number" class="form-control input-sm" ng-model="$ctrl.plotState.bmcut" step="0.1" ng-change="$ctrl.update()"/>
+                <rzslider rz-slider-model="$ctrl.plotState.bmcut" rz-slider-options="$ctrl.sliders.bmcut"></rzslider>
+              </div>
+            </div>
+
+            <div class="row clear">
+              <div id="gene-count" class="col-md-12 text-right">
+                <label>Up: {{$ctrl.upDown[0]}}</label>
+                <label>Down: {{$ctrl.upDown[1]}}</label>
+              </div>
+            </div>
+          </div>
+          <div id="plot-options"uib-accordion-group class="panel-default" is-open="$ctrl.uiState.plot">
+            <uib-accordion-heading>
+              Plot <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': $ctrl.uiState.plot, 'glyphicon-chevron-right': !$ctrl.uiState.plot}"></i>
+            </uib-accordion-heading>
             <div class="col-md-12 col-xs-6">
-              <rzslider rz-slider-model="main.plotState.alpha" rz-slider-options="main.fcAlphaSlider"></rzslider>
+              <rzslider rz-slider-model="$ctrl.plotState.alpha" rz-slider-options="$ctrl.sliders.alpha"></rzslider>
             </div>
 
             <div id="plot-field" class="col-md-12 col-xs-6">
               <label>Density plot:</label>
-              <input type="radio" name="hex" value="hex" checked ng-model="main.plotState.plot" ng-change="main.draw()"> Hexplot
-              <input type="radio" name="scatter" value="scatter" ng-model="main.plotState.plot" ng-change="main.draw()"> Scatterplot
+              <input type="radio" name="hex" value="hex" checked ng-model="$ctrl.plotState.plot" ng-change="$ctrl.draw()"> Hexplot
+              <input type="radio" name="scatter" value="scatter" ng-model="$ctrl.plotState.plot" ng-change="$ctrl.draw()"> Scatterplot
             </div>
 
             <div id="plot-type" class="col-md-12 col-xs-6">
               <label>Type:</label>
-              <input type="radio" name="MA" value="MA" checked ng-model="main.plotState.plotType" ng-change="main.draw()"> MA-plot
-              <input type="radio" name="Volcano" value="Volcano" ng-model="main.plotState.plotType" ng-change="main.draw()"> Volcano
+              <input type="radio" name="MA" value="MA" checked ng-model="$ctrl.plotState.plotType" ng-change="$ctrl.draw()"> MA-plot
+              <input type="radio" name="Volcano" value="Volcano" ng-model="$ctrl.plotState.plotType" ng-change="$ctrl.draw()"> Volcano
             </div>
           </div>
-        </form>
-      </div>
+        </uib-accordion>
+      <form>
 
-    </div>
-    <div class="col-md-9" on-resize="main.draw()">
-      <div class="well chart-height chart-well">
-        <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar chart-toolbar" role="group" aria-label="toolbar">
-          <button type="button" class="btn btn-sm btn-default" ng-disabled="main.chart.brush.empty()" ng-click="main.chartAction('zoomExtent')" title="zoom to selection">
-            <span class="fa-stack zoom-extent">
-              <i class="fa fa-square-o fa-stack-1x" aria-hidden="true"></i>
-              <i class="fa fa-search fa-stack-1x" aria-hidden="true"></i>
-            </span>
-          </button>
+        <!-- div class="well chart-height">
 
-          <button type="button" class="btn btn-sm btn-default" ng-click="main.chartAction('zoomIn')" title="zoom in">
-            <i class="fa fa-search-plus" aria-hidden="true"></i>
-          </button>
+          <form>
+            <label>Dataset:</label>
+            <select id="data-set" class="form-control"
+              ng-options="option.name for option in $ctrl.dataPackage.resources[0].data track by option.filename"
+              ng-model="$ctrl.selectedData"
+              ng-change="$ctrl.loadDataset($ctrl.selectedData)"></select>
 
-          <button type="button" class="btn btn-default" ng-click="main.chartAction('zoomOut')" title="zoom out">
-            <i class="fa fa-search-minus" aria-hidden="true"></i>
-          </button>
+            <label>Locate symbol:</label>
+            <ui-select id="gene-select"
+                multiple theme="bootstrap" paste="$ctrl.pasteSymbols" tagging-tokens="SPACE|,|/"
+                ng-model="$ctrl.geneList"
+                ng-change="$ctrl.update()">
+              <ui-select-no-choice>
+                We couldn't find any matches...
+              </ui-select-no-choice>
+              <ui-select-match placeholder="Select genes...">
+                {{::$item.symbol}}
+                <span class="badge" ng-style="{ backgroundColor: $ctrl.plotState.colorScale($index) }">
+                  <small>
+                    {{::$item.count}}
+                  </small>
+                </span>
+              </ui-select-match>
+              <ui-select-choices repeat="gene in $ctrl.uniqGeneList | filter: $select.search | limitTo: 100 track by gene.symbol"
+                  refresh-delay="1000"
+                  ng-class="{ hide: $select.search.length < 1 }">
+                  <span ng-bind-html="::gene.symbol | highlight: $select.search"></span>
+                  <span class="badge">
+                    <small ng-bind="::gene.count">
+                    </small>
+                  </span>
+              </ui-select-choices>
+            </ui-select>
+            <div class="row">
+              <div class="col-xs-12">
+                <div id="gene-list-toolbar" class="btn-group btn-group-xs pull-right">
+                  <button id="clipboard-btn" class="btn btn-sm btn-default" title="Copy list to clipboard"
+                  ng-disabled="$ctrl.geneList.length === 0">
+                    <i class="fa fa-clipboard" aria-hidden="true"></i>
+                  </button>
+                  <button class="btn btn-sm btn-default" title="Clear"
+                    ng-click="$ctrl.geneList = []; $ctrl.update()"
+                    ng-disabled="$ctrl.geneList.length === 0">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
 
-          <button type="button" class="btn btn-default" ng-click="main.chartAction('zoomHome')" title="zoom home">
-            <i class="fa fa-arrows-alt" aria-hidden="true"></i>
-          </button>
-        </div>
+            <div id="filters" class="row clear">
+              <div class="col-md-12">
+                <label>Filters</label>
+              </div>
 
-        <div id="_scatter__chart" class="_scatter" file-dropzone="[text/plain,text/csv,text/tab-separated-values]" data-max-file-size="30" dropped="main.dropped(file)">
-          <div class="spinner-icon"></div>
-          <div class="drop-here">
-            Drop File Here
+              <div id="fc-filter" class="col-md-12 col-xs-6">
+                <label>abs. log2FoldChange &gt; <a ng-click="$ctrl.uiState.fccut = !$ctrl.uiState.fccut">{{$ctrl.plotState.fccut}}</a></label>
+                <div uib-collapse="$ctrl.uiState.fccut">
+                  <input type="number" class="form-control input-sm" ng-model="$ctrl.plotState.fccut" min="0" max="5" step="0.1" ng-change="$ctrl.update()"/>
+                  <rzslider rz-slider-model="$ctrl.plotState.fccut" rz-slider-options="$ctrl.fcCutSlider"></rzslider>
+                </div>
+              </div>
+
+              <div id="fdr-filter" class="col-md-12 col-xs-6">
+                <label>AND log10 FDR &le; <a ng-click="$ctrl.uiState.logpcut = !$ctrl.uiState.logpcut">{{$ctrl.plotState.logpcut}}</a></label>
+                <div uib-collapse="$ctrl.uiState.logpcut">
+                  <input type="number" class="form-control input-sm" ng-model="$ctrl.plotState.logpcut" min="-5" max="0" step="0.1" ng-change="$ctrl.update()"/>
+                  <rzslider rz-slider-model="$ctrl.plotState.logpcut" rz-slider-options="$ctrl.fdrCutSlider"></rzslider>
+                </div>
+              </div>
+            </div>
+            <div id="gene-count" class="row clear">
+              <div id="fdr-filter" class="col-md-12 text-right">
+                <label>Up: {{$ctrl.upDown[0]}}</label>
+                <label>Down: {{$ctrl.upDown[1]}}</label>
+              </div>
+            </div>
+            <div id="plot-options" class="row clear">
+              <div class="col-md-12">
+                <label>Plot</label>
+              </div>
+
+              <div class="col-md-12 col-xs-6">
+                <rzslider rz-slider-model="$ctrl.plotState.alpha" rz-slider-options="$ctrl.fcAlphaSlider"></rzslider>
+              </div>
+
+              <div id="plot-field" class="col-md-12 col-xs-6">
+                <label>Density plot:</label>
+                <input type="radio" name="hex" value="hex" checked ng-model="$ctrl.plotState.plot" ng-change="$ctrl.draw()"> Hexplot
+                <input type="radio" name="scatter" value="scatter" ng-model="$ctrl.plotState.plot" ng-change="$ctrl.draw()"> Scatterplot
+              </div>
+
+              <div id="plot-type" class="col-md-12 col-xs-6">
+                <label>Type:</label>
+                <input type="radio" name="MA" value="MA" checked ng-model="$ctrl.plotState.plotType" ng-change="$ctrl.draw()"> MA-plot
+                <input type="radio" name="Volcano" value="Volcano" ng-model="$ctrl.plotState.plotType" ng-change="$ctrl.draw()"> Volcano
+              </div>
+            </div>
+          </form>
+        </div -->
+
+      <div class="col-md-9" on-resize="$ctrl.draw()">
+        <div class="well chart-height chart-well">
+          <div id="chart-toolbar" class="btn-group btn-group-xs pull-right toolbar chart-toolbar" role="group" aria-label="toolbar">
+            <button type="button" class="btn btn-sm btn-default" ng-disabled="$ctrl.chart.brush.empty()" ng-click="$ctrl.chartAction('zoomExtent')" title="zoom to selection">
+              <span class="fa-stack zoom-extent">
+                <i class="fa fa-square-o fa-stack-1x" aria-hidden="true"></i>
+                <i class="fa fa-search fa-stack-1x" aria-hidden="true"></i>
+              </span>
+            </button>
+
+            <!-- button type="button" class="btn btn-sm btn-default" ng-click="$ctrl.chartAction('zoomIn')" title="zoom in">
+              <i class="fa fa-search-plus" aria-hidden="true"></i>
+            </button -->
+
+            <button type="button" class="btn btn-default" ng-click="$ctrl.chartAction('zoomOut')" title="zoom out">
+              <i class="fa fa-search-minus" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="btn btn-default" ng-click="$ctrl.chartAction('zoomHome')" title="zoom home">
+              <i class="fa fa-arrows-alt" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div id="_scatter__chart" class="_scatter" file-dropzone="[text/plain,text/csv,text/tab-separated-values]" data-max-file-size="30" dropped="$ctrl.dropped(file)">
+            <div class="spinner-icon"></div>
+            <div class="drop-here">
+              Drop File Here
+            </div>
           </div>
         </div>
       </div>
+
     </div>
 
-    <div class="col-md-12">
-      <h2>Expression <small>Showing {{main.gridOptions.data.length}} of {{main.dataState.data.length}}</small></h2>
-      <div ui-grid="main.gridOptions" ui-grid-exporter ui-grid-resize-columns class="expression-grid"></div>
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Expression <small>Showing {{$ctrl.gridOptions.data.length}} of {{$ctrl.dataState.data.length}}</small></h2>
+        <div ui-grid="$ctrl.gridOptions" ui-grid-exporter ui-grid-resize-columns class="expression-grid"></div>
+      </div>
     </div>
 
   </div>

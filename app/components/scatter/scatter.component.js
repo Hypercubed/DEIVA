@@ -1,4 +1,4 @@
-import './scatter.css!';
+import './scatter.less!';
 
 import template from './scatter.html!text';
 import controller from './scatter.controller';
@@ -6,7 +6,7 @@ import controller from './scatter.controller';
 export default {
   controller,
   template,
-  controllerAs: 'main',
+  // controllerAs: 'main',
   bindings: {
     dataPackage: '<package'
   }

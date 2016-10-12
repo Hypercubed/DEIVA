@@ -8,7 +8,7 @@ import tip from 'd3-tip';
 import 'd3-tip/examples/example-styles.css!';
 
 import {moveToFront} from './chart.utils';
-import './scatter-chart.css!';
+import './scatter-chart.less!';
 
 export default function Scatter(opts = {}) {
   const margin = opts.margin || {top: 20, right: 20, bottom: 30, left: 40};

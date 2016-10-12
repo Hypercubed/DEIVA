@@ -8,7 +8,7 @@ import 'ui-select/dist/select';
 import 'ui-select/dist/select.css!';
 
 import angularSlider from 'angularjs-slider';
-import './scatter/slider.css!';
+import './scatter/slider.less!';
 
 import 'intro.js/introjs.css!';
 import 'angular-intro.js';

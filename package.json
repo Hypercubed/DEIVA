@@ -41,6 +41,7 @@
       "browser"
     ],
     "rules": {
+      "no-console": "error",
       "import/no-extraneous-dependencies": 0
     },
     "ignores": [

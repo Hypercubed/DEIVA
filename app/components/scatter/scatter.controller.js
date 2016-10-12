@@ -6,6 +6,8 @@ import crossfilter from 'crossfilter';
 import _ from 'lodash';
 import Clipboard from 'clipboard';
 
+import {transaction, observable} from 'mobx';
+
 // import dp from 'common/services/datapackage/datapackage';
 
 import steps from './intro.json!';
@@ -21,7 +23,7 @@ const cellTemplate = `
       {{COL_FIELD}}
     </span>
     <span ng-switch-default>
-      <a href ng-click="grid.appScope.main.pasteSymbols(COL_FIELD)">
+      <a href ng-click="grid.appScope.$ctrl.pasteSymbols(COL_FIELD)">
         {{COL_FIELD}}
       </a>
     </span>
@@ -116,7 +118,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   });
 
   // sliderOpt
-  const fcAlphaSlider = {
+  /* const fcAlphaSlider = {
     showTicksValues: false,
     showTicks: false,
     enforceStep: false,
@@ -155,6 +157,56 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     // translate: value => `1e${value}`
   };
 
+  const bmCutSlider = {
+    ...sliderOpts,
+    floor: -5,
+    ceil: 5,
+    step: 1,
+    onEnd: updateChartData
+  }; */
+
+  const sliders = {
+    alpha: {
+      showTicksValues: false,
+      showTicks: false,
+      enforceStep: false,
+      floor: 0,
+      ceil: 1,
+      step: 0.01,
+      precision: 2,
+      onEnd: updateChartData,
+      translate: (value, sliderId, label) => {
+        switch (label) {
+          case 'model':
+            return `Opacity: ${value}`;
+          default:
+            return value;
+        }
+      }
+    },
+    fccut: {
+      ...sliderOpts,
+      floor: 0,
+      ceil: 5,
+      step: 1,
+      onEnd: updateChartData
+    },
+    logpcut: {
+      ...sliderOpts,
+      floor: -5,
+      ceil: 0,
+      step: 1,
+      onEnd: updateChartData
+    },
+    bmcut: {
+      ...sliderOpts,
+      floor: -5,
+      ceil: 5,
+      step: 1,
+      onEnd: updateChartData
+    }
+  };
+
   // debounced functions
   const δdrawChart = _.debounce(() => {
     $chart.selectAll('svg').remove();
@@ -180,23 +232,33 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     });
   }, 100);
 
+  const dataPackage = main.dataPackage;
+
   return Object.assign(main, {
     editorOptions: {
-      data: main.dataPackage,
+      data: dataPackage,
       enableOpen: false
     },
-    gene: main.dataPackage.resources[0].data[0].gene,
+    gene: dataPackage.resources[0].data[0].gene,
     geneList: [],
-    plotState: {
+    uiState: observable({
+      dataset: true,
+      locate: true,
+      filters: true,
+      plot: true
+    }),
+    plotState: observable({
       // pcut: 0.1,
       fccut: 0,
+      bmcut: -5,
       logpcut: -1,
       alpha: 0.8,
       plot: 'hex',
       plotType: 'MA',
       colorScale // maybe shouldn't be state
-    },
-    selectedData: main.dataPackage.resources[0].data[0],
+    }),
+    xLabel,
+    selectedData: dataPackage.resources[0].data[0],
     upDown: [0, 0],
     // colorScale,
     dataState: {},
@@ -215,31 +277,37 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     chart,
     $chart,
     updateList: δupdateList,
-    fcAlphaSlider,
+    /* fcAlphaSlider,
     fcCutSlider,
     fdrCutSlider,
+    bmCutSlider, */
+    sliders,
     chartAction: δchartAction,
     $onInit: () => {
       chart.brush.on('brushend.select', δupdateList);
-      loadDataset(main.dataPackage.resources[0].data[0]);
+      return loadDataset(dataPackage.resources[0].data[0]);
     }
   });
 
-  function loadDataset(set) {
-    dataService.loadResource(main.dataPackage, {
+  async function loadDataset(set) {
+    const r = await dataService.loadResource(dataPackage, {
+      name: set.name,
       title: set.name,
       path: set.filename,
-      schema: main.dataPackage.schemas.deseq2oredgeR
-    })
-      .then(r => {
-        if (r.$error) {
-          $log.error(r);
-          return $chart.classed('dirty', false);
-        }
-        main.dataPackage.resources[1] = r;
-        main.gene = set.gene || set.symbols || '';
-        change();
-      });
+      schema: dataPackage.schemas.deseq2oredgeR
+    });
+    if (r.$error) {
+      $log.error(r);
+      return $chart.classed('dirty', false);
+    }
+    if (dataPackage.resources.length === 1) {
+      dataPackage.resources.push(r);
+    } else {
+      dataPackage.resources[1] = r;
+    }
+
+    main.gene = set.gene || set.symbols || '';
+    change();
   }
 
   function updateList() {
@@ -280,8 +348,22 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     }
 
     const pcut = Math.pow(10, Number(main.plotState.logpcut));
-    const fccut = main.plotState.fccut;
-    const cutoffCheck = d => d.padj <= pcut && (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
+    const fccut = Number(main.plotState.fccut);
+
+    let cutoffCheck;
+    if (isEdgeR) {
+      const bmcut = Number(main.plotState.bmcut);
+      cutoffCheck = d =>
+        d.padj <= pcut &&
+        d.logCPM > bmcut &&
+        (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
+    } else {
+      const bmcut = Math.pow(10, Number(main.plotState.bmcut));
+      cutoffCheck = d =>
+        d.padj <= pcut &&
+        d.baseMean > bmcut &&
+        (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
+    }
 
     const genesSearch = main.geneList.map(x => x.symbol);
 
@@ -303,12 +385,13 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       return d.$cutoffCheck;
     });
 
-    const resource = main.dataPackage.resources[1];
+    const resource = dataPackage.resources[1];
+    const plotType = main.plotState.plotType;
 
     chart
-      .x(x[main.plotState.plotType])
+      .x(x[plotType])
       .y(d => d.log2FoldChange || 0)
-      .xLabel(xLabel[main.plotState.plotType])
+      .xLabel(xLabel[plotType])
       .yLabel('log2FoldChange')
       .title(resource.title || resource.name)
       .showScatter(main.plotState.plot === 'scatter')
@@ -325,19 +408,14 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     main.upDown[1] = d.length - main.upDown[0];
   }
 
-  function updateChartData() {
-    $log.debug('update');
-    $chart.classed('dirty', true);
-    setupChart();
-    δchartAction('updatePoints');
-  }
-
   function change() {
     $log.debug('change');
     $chart.classed('dirty', true);
     $timeout(() => {
-      processData();
-      drawChart();
+      isEdgeR = typeof dataPackage.resources[1].data[0].logCPM !== 'undefined';
+      setupUI(processData());
+      setupChart();
+      δdrawChart();
     });
   }
 
@@ -348,14 +426,19 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     δdrawChart();
   }
 
-  function processData() {
-    $log.debug('processData');
-    const resource = main.dataPackage.resources[1];
+  function updateChartData() {
+    $log.debug('update');
+    $chart.classed('dirty', true);
+    setupChart();
+    δchartAction('updatePoints');
+  }
 
-    const sample = resource.data[0];
+  function setupUI(data) {
+    $log.debug('sutupUI');
 
-    isEdgeR = typeof sample.baseMean === 'undefined' && typeof sample.logCPM !== 'undefined';
+    const resource = dataPackage.resources[1];
 
+    // Here we modify the x value and x-asix label if the file type is edgeR
     if (isEdgeR) {
       x.MA = d => d.logCPM;
       xLabel.MA = 'logCPM';
@@ -364,27 +447,20 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       xLabel.MA = 'log10 baseMean';
     }
 
-    const data = resource.data.filter(d => {
-      d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
-      delete d.PValue;
+    const xExtent = d3.extent(data, x.MA);
+    xExtent[0] = Math.floor(xExtent[0]);
+    xExtent[1] = Math.ceil(xExtent[1]);
 
-      d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
-      delete d.FDR;
+    sliders.bmcut.floor = xExtent[0];
+    sliders.bmcut.ciel = xExtent[1];
 
-      if (isEdgeR) {
-        d.baseMean = Math.pow(2, Number(d.logCPM)) || 0.001;
-        d.logCPM = Number(d.logCPM);
-      } else {
-        d.baseMean = Number(d.baseMean) || 0.001;
-      }
-
-      d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
-      delete d.logFC;
-
-      d.symbol = d.symbol || d.feature;
-      d.symbols = d.symbol.split(';');
-
-      return d.baseMean > 0.001;
+    Object.assign(main.plotState, {
+      fccut: 0,
+      bmcut: xExtent[0],
+      logpcut: -1,
+      alpha: 0.8,
+      plot: 'hex',
+      plotType: 'MA'
     });
 
     const ignoredKeys = [
@@ -478,7 +554,39 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     main.uniqGeneList = uniqGeneList;
 
     main.geneList = [];
-    addSymbols(main.gene);
+    return addSymbols(main.gene);
+  }
+
+  function processData() {
+    $log.debug('processData');
+    return dataPackage.resources[1].data.filter(d => {
+      // ID	Gene_Symbol	baseMean	log2FoldChange	pvalue	padj
+      d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
+      delete d.PValue;
+
+      d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
+      delete d.FDR;
+
+      if (typeof d.logCPM === 'undefined') {
+        d.baseMean = Number(d.baseMean) || NaN;
+      } else {
+        d.baseMean = Math.pow(2, Number(d.logCPM)) || NaN;
+        d.logCPM = Number(d.logCPM);
+      }
+
+      d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
+      delete d.logFC;
+
+      d.feature = d.feature || d.ID;
+      delete d.ID;
+
+      d.symbol = d.symbol || d.Gene_Symbol || d.feature;
+      delete d.Gene_Symbol;
+
+      d.symbols = d.symbol.split(';');
+
+      return !isNaN(d.baseMean); // d.baseMean > 0.001;
+    });
   }
 
   function addSymbols(list) {
@@ -498,8 +606,8 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     });
     if (missing.length > 0) {
       const msg = missing.join(', ');
-      console.error('Genes not found', msg);
-      growl.error(msg, {title: 'Genes not found'});
+      $log.error('Symbols not found', msg);
+      growl.error(msg, {title: 'Symbols not found'});
     }
   }
 
@@ -512,28 +620,28 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
 
     const mediatype = file.type || dataService.mime.lookup(file.name);
 
-    const newResource = dataService.processResource({
-      path: file.name || 'file',
-      name: file.name || 'file',
-      mediatype: (mediatype === 'text/plain') ? 'text/tab-separated-values' : mediatype,
-      content: file.content || '',
-      active: true,
-      $error: false,
-      $errors: [],
-      schema: main.dataPackage.schemas.deseq2oredgeR
+    const newResource = dataPackage.resources[1];
+    transaction(() => {
+      Object.assign(newResource, {
+        path: file.name || 'file',
+        name: file.name || 'file',
+        mediatype: (mediatype === 'text/plain') ? 'text/tab-separated-values' : mediatype,
+        schema: dataPackage.schemas.deseq2oredgeR,
+        content: file.content || ''
+      });
     });
 
     if (newResource.$error) {
       return $chart.classed('dirty', false);
     }
 
-    main.dataPackage.resources[1] = newResource;
+    // dataPackage.resources[1] = newResource;
 
     main.selectedData = null;
     main.gene = '';
     main.geneList = [];
 
-    main.change();
+    change();
   }
 }
 
