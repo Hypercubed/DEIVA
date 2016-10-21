@@ -18,6 +18,8 @@ CHANGELOG
 * Improved chart tool bar readability
 * Improved intro text
 * EdgeR files now display the correct x-axis label
+* GUI Changes
+* Color picker
 
 --------------------
 
