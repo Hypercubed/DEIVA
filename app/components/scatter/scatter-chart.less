@@ -3,6 +3,10 @@
   justify-content:center;
   align-items:center;
 
+  text {
+    font-size: 11px;
+  }
+
   .axis .label {
     font-size: 12px;
     text-anchor: middle;
@@ -90,20 +94,14 @@
 
     opacity: 1;
     transition: opacity linear .3s;
-    -webkit-transition-delay: 0.1s;
     transition-delay: 0.1s;
 
-    -webkit-animation: loading-bar-spinner 400ms linear infinite;
-    -moz-animation:    loading-bar-spinner 400ms linear infinite;
-    -ms-animation:     loading-bar-spinner 400ms linear infinite;
-    -o-animation:      loading-bar-spinner 400ms linear infinite;
     animation:         loading-bar-spinner 400ms linear infinite;
   }
 
   &.dirty svg {
     opacity: 0.5;
     transition: opacity linear .3s;
-    -webkit-transition-delay: 0.1s;
     transition-delay: 0.1s;
   }
 

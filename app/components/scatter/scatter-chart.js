@@ -45,10 +45,10 @@ export default function Scatter(opts = {}) {
   const yMap = d => yScale(yValue(d)); // data -> display
   const yAxis = d3.svg.axis().scale(yScale).orient('left'); // .tickFormat(yTickFormat);
 
-  const highlightColor = opts.highlightColor || d3.scale.category10();
+  let highlightColor = opts.highlightColor || d3.scale.category10();
 
   // const highlightFilter = d => d.highlight;
-  let highlightDomain = highlightColor.domain();
+  // let highlightDomain = highlightColor.domain();
   // const cutoffFilter = d => d.$cutoffCheck;
 
   const hsize = 4;
@@ -371,48 +371,37 @@ export default function Scatter(opts = {}) {
       }
 
       function drawPoints() {
-        const ordinal = d3.scale.ordinal()
-          .domain(highlightDomain)
-          .range(highlightColor.range());
-
         legendOrdinal
-          .scale(ordinal);
+          .scale(highlightColor);
 
         container.select('.legendOrdinal')
           .call(legendOrdinal);
 
-        const dd = showScatter ? d : d.filter(d => d.$showPoint);
-
-        /* const dd = d.filter(d => {
-          d.highlight = highlightFilter(d);
-          return showScatter || d.highlight > -1;
-        }); */
+        const dd = showScatter ? d : d.filter(d => d.highlight);
 
         const points = pointsG.selectAll('.point')
-            .data(dd);
+          .data(dd);
 
         points.enter().append('circle')
-            .attr('class', 'point')
-            .attr('x', 0)
-            .attr('y', 0)
-            // .style('cursor', 'pointer')
-            .on('mouseover', tooltip.show)
-            .on('mouseout', tooltip.hide);
+          .attr('class', 'point')
+          .attr('x', 0)
+          .attr('y', 0)
+          .on('mouseover', tooltip.show)
+          .on('mouseout', tooltip.hide);
 
         points.exit().remove();
 
         points
-          .attr('class', d => d.$showPoint ? 'point highlight' : 'point')
+          .attr('class', d => d.highlight ? 'point highlight' : 'point')
           .attr('transform', d => `translate(${xMap(d)},${yMap(d)})`)
           .each(function (d) {
             const e = d3.select(this);
-            const highlight = d.highlight;
 
-            if (highlight > -1) {
+            if (d.highlight) {
               e
                 .style('opacity', 1)
                 .attr('r', 4)
-                .style('fill', highlightColor(highlight));
+                .style('fill', highlightColor(d.highlight));
 
               moveToFront.call(this);
             } else {
@@ -474,6 +463,14 @@ export default function Scatter(opts = {}) {
     return scatter;
   };
 
+  scatter.highlightColor = function (_) {
+    if (arguments.length < 1) {
+      return highlightColor;
+    }
+    highlightColor = _;
+    return scatter;
+  };
+
   /* scatter.cutoffFilter = function (_) {
     if (arguments.length < 1) {
       return cutoffFilter;
@@ -490,13 +487,13 @@ export default function Scatter(opts = {}) {
     return scatter;
   }; */
 
-  scatter.highlightDomain = function (_) {
+  /* scatter.highlightDomain = function (_) {
     if (arguments.length < 1) {
       return highlightDomain;
     }
     highlightDomain = _;
     return scatter;
-  };
+  }; */
 
   scatter.showScatter = function (_) {
     if (arguments.length < 1) {

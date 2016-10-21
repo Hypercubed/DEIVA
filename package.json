@@ -19,7 +19,7 @@
   "private": true,
   "description": "Interactive Visual Analysis of differential gene expression test results",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "xo && cypress run"
   },
   "repository": {
     "type": "git",
@@ -46,7 +46,8 @@
     },
     "ignores": [
       "app/data/**",
-      "gulp/*.js"
+      "gulp/*.js",
+      "cypress/support/**"
     ]
   }
 }

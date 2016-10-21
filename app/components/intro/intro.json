@@ -43,6 +43,9 @@
     "element": "#fdr-filter",
     "intro": "Set a custom FDR filter."
   },{
+    "element": "#bm-filter",
+    "intro": "Set a custom baseMean or logCPM filter."
+  },{
     "element": "#_scatter__chart",
     "intro": "Features passing these filters will be indicated in red on the plot..."
   },{
@@ -52,7 +55,7 @@
     "element": "#plot-options",
     "intro": "Change density plot opacity, density plot type (Hexplot/Scatterplot), and plot type (MA/Volcano) here."
   },{
-    "element": "#plot-field",
+    "element": "#plot-options",
     "intro": "Switch between hexplot (fast) and scatter plot. The scatter plot is slower but allows inspection of each feature in the plot."
   },{
     "element": "#charts",
