@@ -47,7 +47,8 @@
     "ignores": [
       "app/data/**",
       "gulp/*.js",
-      "cypress/support/**"
+      "cypress/support/**",
+      "scripts/*.js"
     ]
   }
 }
