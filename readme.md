@@ -25,7 +25,16 @@ DEIVA provides an interface where domain experts simply go to a URL and can imme
 
 ## Using the DEIVA web interface
 
-The interface is self-explanatory and should be usable by anyone accustomed to a contemporary web app.  If you require further instructions use the "Show me" in the upper right of the user interface.
+The interface is self-explanatory and should be usable by anyone accustomed to a contemporary web app. If you require further instructions use the "Show me" in the upper right of the user interface.
+
+### User-defined custom colors for symbols
+
+After searching and finding a symbol through the search box, the symbol appears as a label in the search box. Within this label, there is a counter which indicates how many features have been found and highlighted in the plot with this symbol. The counter has the same color as the symbol in the plot and the legend. Within the counter is a small down-arrow. Clicking on this arrow opens a color choose dialog. This enables the user to define a custom color for any symbol. The colors are remebered for each symbol as long as the user stays within one experiment. For example, if the user finds a symbol, changes the color, deletes the symbol, and finally finds the symbol again, the last color assigned to this symbol is remembered.
+
+### Features with more than one symbol assigned should be separated by semicolon to enable multi-find
+
+Symbols can also be found by clicking the symbol name in the table. There is one idiosyncratic behaviour added for symbols which contain one or more semicolons. In these cases, all symbols contained in the string are added to search box as separate labels. The color assigned 
+For example, a feature might be associated with the symbol "Kif1b;Cort". This means it belongs to the gene "Kif1b" as well as "Cort". When clicking on the symbol annotation "Kif1b;Cort" in the table, both gene symbol will be added to the search box as separate entities. Features annotated only with "Kif1b" or "Cort" will be highlighted. Features annotated with "Kif1b;Cort" will be highlighted separatedly in the same color as the first symbol in the compound string (in this case the color of Kif1b).
 
 ## Preparing input data files
 
