@@ -19,7 +19,8 @@
   "private": true,
   "description": "Interactive Visual Analysis of differential gene expression test results",
   "scripts": {
-    "test": "xo && cypress run"
+    "test": "xo && cypress run",
+    "version": "chg release -y && git add -A CHANGELOG.md"
   },
   "repository": {
     "type": "git",

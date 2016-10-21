@@ -2,6 +2,11 @@ CHANGELOG
 =========
 
 ## HEAD (Unreleased)
+_(none)_
+
+--------------------
+
+## 1.0.0-beta.6 (2016-10-21)
 * Updates for Project-X v1.0.0-alpha.10
 * Locate symbol now searches for unique symbol names, features can be associated with multiple symbols separated by a semicolon
 * gene in index file is optional
@@ -20,8 +25,6 @@ CHANGELOG
 * EdgeR files now display the correct x-axis label
 * GUI Changes
 * Color picker
-
---------------------
 
 ## 1.0.0-alpha.2 (2016-05-11)
 * Math.abs(d.log2FoldChange) > fccut
