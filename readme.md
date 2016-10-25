@@ -2,39 +2,39 @@
 
 ## Contents
 
-[Interactive exploration of gene expression tests made easy](#interactive-exploration-of-gene-expression-tests-made-easy)
+1. [Interactive exploration of gene expression tests made easy](#interactive-exploration-of-gene-expression-tests-made-easy)
 
-[Features](#features)
+2. [Features](#features)
 
-[Using the DEIVA web interface](#using-the-deiva-web-interface)
+3. [Using the DEIVA web interface](#using-the-deiva-web-interface)
 
-	* [User-defined custom colors for symbols](#user-defined-custom-colors-for-symbols)
+   * [User-defined custom colors for symbols](#user-defined-custom-colors-for-symbols)
 
-	* [Features with more than one symbol assigned should be separated by semicolon to enable multi-find](#features-with-more-than-one-symbol-assigned-should-be-separated-by-semicolon-to-enable-multi-find)
+   * [Features with more than one symbol assigned should be separated by semicolon to enable multi-find](#features-with-more-than-one-symbol-assigned-should-be-separated-by-semicolon-to-enable-multi-find)
 
-[DEIVA input file format](#deiva-input-file-format)
+4. [DEIVA input file format](#deiva-input-file-format)
 
-	* [DESeq2 flavor](#deseq2-flavor)
+   * [DESeq2 flavor](#deseq2-flavor)
 
-	* [edgeR flavor](#edger-flavor)
+   * [edgeR flavor](#edger-flavor)
 
-	* [Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
+   * [Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
 
-[Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
+5. [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
 
-	* [Pre-built](#pre-built)
+   * [Pre-built](#pre-built)
 
-	* [Building from source](#building-from-source)
+   * [Building from source](#building-from-source)
 
-[About Project χ](#about-project-χ)
+6. [About Project χ](#about-project-χ)
 
-[Contact](#contact)
+7. [Contact](#contact)
 
-[How to cite](#how-to-cite)
+8. [How to cite](#how-to-cite)
 
-[Acknowledgments](#acknowledgments)
+9. [Acknowledgments](#acknowledgments)
 
-[Source Code License](#source-code-license)
+10. [Source Code License](#source-code-license)
 
 ## Interactive exploration of gene expression tests made easy
 
