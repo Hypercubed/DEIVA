@@ -59,7 +59,9 @@ The header *does* contain an entry for the first column! Typically, when wrintin
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
-The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
+The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and symbols. A feature can be associated multiple times with the same symbol (or even list of symbols).
+
+The `symbol` column will typically contain gene names or gene symbols associated with the respective feature, but can contain any annnotation desired (cluster names, protein identifiers...).
 
 Example for a DEIVA input file:
 
@@ -77,7 +79,7 @@ Example for a DEIVA input file:
 
 ### edgeR flavor
 
-When starting from edgeR output, the input file needs to have the following columns:
+An alternative input format is also possible, this is especially useful when starting from edgeR files. Here the input file needs to have the following columns:
 
 * feature
 * logFC
@@ -87,7 +89,7 @@ When starting from edgeR output, the input file needs to have the following colu
 * FDR
 * symbol
 
-An alternative input format is also possible, this is especially useful when starting from edgeR files:
+Example:
 
 | feature |logFC   |logCPM  |LR      |PValue  |FDR     |symbol|
 |---	|---	|---		|---			|---		|---			|--- |
