@@ -38,7 +38,7 @@ For example, a feature might be associated with the symbol "Kif1b;Cort". This me
 
 ## Preparing input data files
 
-The code provided here works out of the box with the example given. But DEIVA can easily be expanded and modified to your own project. In particular the input data file can be augmented by more columns encoding gene features of interest, and these features can be rendered in different styles in the plot.
+The code provided here works out of the box with the example given.
 
 You need at least one input data file, which is a slightly augmented output from either DESeq2 or edgeR.
 
