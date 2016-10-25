@@ -548,7 +548,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       });
 
     main.uniqGeneMap = uniqGeneMap;
-    main.uniqGeneList = Object.values(uniqGeneMap);
+    main.uniqGeneList = _.values(uniqGeneMap);
 
     $log.debug('done getting unique symbols', main.uniqGeneList.length);
 
@@ -631,6 +631,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     const newResource = dataPackage.resources[1];
     transaction(() => {
       Object.assign(newResource, {
+        title: file.name,
         path: file.name || 'file',
         name: file.name || 'file',
         mediatype: (mediatype === 'text/plain') ? 'text/tab-separated-values' : mediatype,
