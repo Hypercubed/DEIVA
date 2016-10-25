@@ -36,13 +36,13 @@ After searching and finding a symbol through the search box, the symbol appears 
 Symbols can also be found by clicking the symbol name in the table. There is one idiosyncratic behaviour added for symbols which contain one or more semicolons. In these cases, all symbols contained in the string are added to search box as separate labels. The color assigned 
 For example, a feature might be associated with the symbol "Kif1b;Cort". This means it belongs to the gene "Kif1b" as well as "Cort". When clicking on the symbol annotation "Kif1b;Cort" in the table, both gene symbol will be added to the search box as separate entities. Features annotated only with "Kif1b" or "Cort" will be highlighted. Features annotated with "Kif1b;Cort" will be highlighted separatedly in the same color as the first symbol in the compound string (in this case the color of Kif1b).
 
-## Preparing input data files
+## DEIVA input file format
 
-The code provided here works out of the box with the example given.
-
-You need at least one input data file, which is a slightly augmented output from either DESeq2 or edgeR.
+DEIVA accepts input files in two different input formats. Both input file formats are simple tab-separated ASCII files containing a certain number of columns. Additional columns can be added as the user sees fit and are included in the table and can therefore be searched and sorted by, but have no effect on plot rendering. We refer to the two possible input file formats as the "DESeq2 flavour" and the "edgeR flavour". This alludes to the fact that these input file formats can be generated most easily when the differential gene expression test has been done with DESeq2 or edgeR respectively. However, DEIVA is on no way specific to DESeq2 or edgeR; the reason why the input file formats of DEIVA are designed in a way to ease working with these two packages is entirely for convenience and because we assume that DESeq2 and edgeR are maybe the most popular packages for differential gene expression testing.
 
 Please keep in mind that neither DESeq2 nor edgeR have an "output format" as such, the exact format in which you write the resulting tables to disc depends on which function in R you use.
+
+The number of required columns are six for the DESeq2 flavour and seven for the edgeR flavour.
 
 ### DESeq2 flavor
 
