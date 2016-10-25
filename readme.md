@@ -21,7 +21,7 @@ DEIVA provides an interface where domain experts simply go to a URL and can imme
 * **Zoom** using the toolbar to zoom into selected rectangle and to reset.
 * **Filter** two different cut-off sliders which are linked by logical "and". Number of genes passing the filter, up and down, is shown.
 * **Mobile device support**. The user interface adapts to desktop as well as mobile environment devices.
-* **User data**.  Drag and drop formatted DGE files onto the plot area to view in DEIVA. (See [Preparing input data files](#preparing-input-data-files))
+* **User data**.  Drag and drop formatted DGE files onto the plot area to view in DEIVA. (See [DEIVA input file format](#deiva-input-file-format))
 
 ## Using the DEIVA web interface
 
