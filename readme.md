@@ -8,25 +8,23 @@
 
 [Using the DEIVA web interface](#using-the-deiva-web-interface)
 
-[User-defined custom colors for symbols](#user-defined-custom-colors-for-symbols)
+	* [User-defined custom colors for symbols](#user-defined-custom-colors-for-symbols)
 
-[Features with more than one symbol assigned should be separated by semicolon to enable multi-find](#features-with-more-than-one-symbol-assigned-should-be-separated-by-semicolon-to-enable-multi-find)
+	* [Features with more than one symbol assigned should be separated by semicolon to enable multi-find](#features-with-more-than-one-symbol-assigned-should-be-separated-by-semicolon-to-enable-multi-find)
 
 [DEIVA input file format](#deiva-input-file-format)
 
-[DESeq2 flavor](#deseq2-flavor)
+	* [DESeq2 flavor](#deseq2-flavor)
 
-[edgeR flavor](#edger-flavor)
+	* [edgeR flavor](#edger-flavor)
 
-[Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
+	* [Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
 
 [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
 
-[Pre-built](#pre-built)
+	* [Pre-built](#pre-built)
 
-[Building from source](#building-from-source)
-
-[navigate to http://localhost:9000](#navigate-to-http://localhost:9000)
+	* [Building from source](#building-from-source)
 
 [About Project χ](#about-project-χ)
 
