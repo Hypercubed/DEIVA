@@ -1,5 +1,41 @@
 # DEIVA: Interactive Visual Analysis of differential gene expression test results
 
+## Contents
+
+1. [Interactive exploration of gene expression tests made easy](#interactive-exploration-of-gene-expression-tests-made-easy)
+
+2. [Features](#features)
+
+3. [Using the DEIVA web interface](#using-the-deiva-web-interface)
+
+   * [User-defined custom colors for symbols](#user-defined-custom-colors-for-symbols)
+
+   * [Features with more than one symbol assigned should be separated by semicolon to enable multi-find](#features-with-more-than-one-symbol-assigned-should-be-separated-by-semicolon-to-enable-multi-find)
+
+4. [DEIVA input file format](#deiva-input-file-format)
+
+   * [DESeq2 flavor](#deseq2-flavor)
+
+   * [edgeR flavor](#edger-flavor)
+
+   * [Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
+
+5. [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
+
+   * [Pre-built](#pre-built)
+
+   * [Building from source](#building-from-source)
+
+6. [About Project χ](#about-project-χ)
+
+7. [Contact](#contact)
+
+8. [How to cite](#how-to-cite)
+
+9. [Acknowledgments](#acknowledgments)
+
+10. [Source Code License](#source-code-license)
+
 ## Interactive exploration of gene expression tests made easy
 
 DEIVA (Differential Gene Expression Interactive Visual Analysis) is a web app to interactively identify and locate genes in a hexbin or scatter plot of DESeq2 or edgeR results.
@@ -21,19 +57,27 @@ DEIVA provides an interface where domain experts simply go to a URL and can imme
 * **Zoom** using the toolbar to zoom into selected rectangle and to reset.
 * **Filter** two different cut-off sliders which are linked by logical "and". Number of genes passing the filter, up and down, is shown.
 * **Mobile device support**. The user interface adapts to desktop as well as mobile environment devices.
-* **User data**.  Drag and drop formatted DGE files onto the plot area to view in DEIVA. (See [Preparing input data files](#preparing-input-data-files))
+* **User data**.  Drag and drop formatted DGE files onto the plot area to view in DEIVA. (See [DEIVA input file format](#deiva-input-file-format))
 
 ## Using the DEIVA web interface
 
-The interface is self-explanatory and should be usable by anyone accustomed to a contemporary web app.  If you require further instructions use the "Show me" in the upper right of the user interface.
+The interface is self-explanatory and should be usable by anyone accustomed to a contemporary web app. If you require further instructions use the "Show me" in the upper right of the user interface.
 
-## Preparing input data files
+### User-defined custom colors for symbols
 
-The code provided here works out of the box with the example given. But DEIVA can easily be expanded and modified to your own project. In particular the input data file can be augmented by more columns encoding gene features of interest, and these features can be rendered in different styles in the plot.
+After searching and finding a symbol through the search box, the symbol appears as a label in the search box. Within this label, there is a counter which indicates how many features have been found and highlighted in the plot with this symbol. The counter has the same color as the symbol in the plot and the legend. Within the counter is a small down-arrow. Clicking on this arrow opens a color choose dialog. This enables the user to define a custom color for any symbol. The colors are remebered for each symbol. For example, if the user finds a symbol, changes the color, deletes the symbol, and finally finds the symbol again, the last color assigned to this symbol is remembered.
 
-You need at least one input data file, which is a slightly augmented output from either DESeq2 or edgeR.
+### Features with more than one symbol assigned should be separated by semicolon to enable multi-find
 
-Please keep in mind that neither DESeq2 nor edgeR have an "output format" as such, the exact format in which you write the resulting tables to disc depends on which function in R you use.
+Symbols can also be found by clicking the symbol name in the table. If a feature is associated with two or more symbols separated by semicolons, all symbols added to search box as separate labels. The color assigned to the first symbol in the list is used for highlighting the respective feature. For example, a feature might be associated with the symbol "Kif1b;Cort". This means it belongs to the gene "Kif1b" as well as "Cort". When clicking on the symbol annotation "Kif1b;Cort" in the table, both gene symbols will be added to the search box as separate entities. Features annotated with "Kif1b" or "Cort" will be highlighted. Features annotated with multiple symbols including "Kif1b" or "Cort" (for example "Kif1b;Cort") will be highlighted separatedly in the same color as the first symbol in the compound string (in this case the color of Kif1b).
+
+## DEIVA input file format
+
+DEIVA accepts input files in two different input formats. Both input file formats are simple ASCII files containing a certain number of columns, either all tab- or comma-separated. Additional columns can be added as the user sees fit and are included in the table and can therefore be searched and sorted by, but have no effect on plot rendering. We refer to the two possible input file formats as the "DESeq2 flavour" and the "edgeR flavour". This alludes to the fact that these input file formats can be generated most easily when the differential gene expression test has been done with DESeq2 or edgeR respectively. However, DEIVA is on no way specific to DESeq2 or edgeR; the reason why the input file formats of DEIVA are designed in a way to ease working with these two packages is entirely for convenience and because we assume that DESeq2 and edgeR are maybe the most popular packages for differential gene expression testing.
+
+Please keep in mind that neither DESeq2 nor edgeR have an "output format" as such, the exact format in which you write the resulting tables to disk depends on which function in R you use.
+
+The number of required columns are six for the DESeq2 flavour and seven for the edgeR flavour.
 
 ### DESeq2 flavor
 
@@ -46,11 +90,13 @@ The input file needs to have the following columns:
 * pvalue
 * padj
 
-The header *does* contain an entry for the first column! Typically, when writing a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
+The header *does* contain an entry for the first column! Typically, when wrinting a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
 
 DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
 
-The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and genes.
+The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and symbols. A feature can be associated multiple times with the same symbol (or even list of symbols).
+
+The `symbol` column will typically contain gene names or gene symbols associated with the respective feature, but can contain any annnotation desired (cluster names, protein identifiers...).
 
 Example for a DEIVA input file:
 
@@ -68,7 +114,7 @@ Example for a DEIVA input file:
 
 ### edgeR flavor
 
-When starting from edgeR output, the input file needs to have the following columns:
+An alternative input format is also possible, this is especially useful when starting from edgeR files. Here the input file needs to have the following columns:
 
 * feature
 * logFC
@@ -78,7 +124,7 @@ When starting from edgeR output, the input file needs to have the following colu
 * FDR
 * symbol
 
-An alternative input format is also possible, this is especially useful when starting from edgeR files:
+Example:
 
 | feature |logFC   |logCPM  |LR      |PValue  |FDR     |symbol|
 |---	|---	|---		|---			|---		|---			|--- |
