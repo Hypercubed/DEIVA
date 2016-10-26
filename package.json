@@ -43,7 +43,8 @@
     ],
     "rules": {
       "no-console": "error",
-      "import/no-extraneous-dependencies": 0
+      "import/no-extraneous-dependencies": 0,
+      "import/no-unresolved": 0
     },
     "ignores": [
       "app/data/**",

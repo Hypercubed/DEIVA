@@ -3,7 +3,7 @@
 import d3 from 'd3';
 
 import crossfilter from 'crossfilter';
-import _ from 'lodash';
+import {debounce, flatMap, values} from 'lodash';
 import Clipboard from 'clipboard';
 
 import {transaction} from 'mobx';
@@ -182,7 +182,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   };
 
   // debounced functions
-  const δdrawChart = _.debounce(() => {
+  const δdrawChart = debounce(() => {
     $container.selectAll('svg').remove();
 
     $container.select('.chart').datum(main.dataState.data)
@@ -191,13 +191,13 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     $container.classed('dirty', false);
   }, 30);
 
-  const δupdateList = _.debounce(() => {
+  const δupdateList = debounce(() => {
     $scope.$applyAsync(() => {
       updateList();
     });
   }, 30);
 
-  const δchartAction = _.debounce(action => {
+  const δchartAction = debounce(action => {
     $container.classed('dirty', true);
     $scope.$applyAsync(() => {
       chart[action]();
@@ -540,7 +540,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     // fullGeneList.sort();
 
     const uniqGeneMap = Object.create(null);
-    _.flatMap(data, d => d.symbols)
+    flatMap(data, d => d.symbols)
       .sort()
       .forEach(symbol => {
         const item = uniqGeneMap[symbol] || (uniqGeneMap[symbol] = {symbol, count: 0});
@@ -548,7 +548,7 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       });
 
     main.uniqGeneMap = uniqGeneMap;
-    main.uniqGeneList = _.values(uniqGeneMap);
+    main.uniqGeneList = values(uniqGeneMap);
 
     $log.debug('done getting unique symbols', main.uniqGeneList.length);
 
