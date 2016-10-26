@@ -1,40 +1,24 @@
 # DEIVA: Interactive Visual Analysis of differential gene expression test results
 
-## Contents
+## Table of contents
 
-1. [Interactive exploration of gene expression tests made easy](#interactive-exploration-of-gene-expression-tests-made-easy)
-
-2. [Features](#features)
-
-3. [Using the DEIVA web interface](#using-the-deiva-web-interface)
-
+* [Interactive exploration of gene expression tests made easy](#interactive-exploration-of-gene-expression-tests-made-easy)
+* [Features](#features)
+* [Using the DEIVA web interface](#using-the-deiva-web-interface)
    * [User-defined custom colors for symbols](#user-defined-custom-colors-for-symbols)
-
    * [Features with more than one symbol assigned should be separated by semicolon to enable multi-find](#features-with-more-than-one-symbol-assigned-should-be-separated-by-semicolon-to-enable-multi-find)
-
-4. [DEIVA input file format](#deiva-input-file-format)
-
+* [DEIVA input file format](#deiva-input-file-format)
    * [DESeq2 flavor](#deseq2-flavor)
-
    * [edgeR flavor](#edger-flavor)
-
    * [Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
-
-5. [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
-
+* [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
    * [Pre-built](#pre-built)
-
    * [Building from source](#building-from-source)
-
-6. [About Project χ](#about-project-χ)
-
-7. [Contact](#contact)
-
-8. [How to cite](#how-to-cite)
-
-9. [Acknowledgments](#acknowledgments)
-
-10. [Source Code License](#source-code-license)
+* [About Project χ](#about-project-χ)
+* [Contact](#contact)
+* [How to cite](#how-to-cite)
+* [Acknowledgments](#acknowledgments)
+* [Source Code License](#source-code-license)
 
 ## Interactive exploration of gene expression tests made easy
 
@@ -65,19 +49,19 @@ The interface is self-explanatory and should be usable by anyone accustomed to a
 
 ### User-defined custom colors for symbols
 
-After searching and finding a symbol through the search box, the symbol appears as a label in the search box. Within this label, there is a counter which indicates how many features have been found and highlighted in the plot with this symbol. The counter has the same color as the symbol in the plot and the legend. Within the counter is a small down-arrow. Clicking on this arrow opens a color choose dialog. This enables the user to define a custom color for any symbol. The colors are remebered for each symbol. For example, if the user finds a symbol, changes the color, deletes the symbol, and finally finds the symbol again, the last color assigned to this symbol is remembered.
+After searching and finding a symbol through the search box, the symbol appears as a label in the search box. Within this label, there is a counter which indicates how many features have been found with this symbol. The counter has the same color as the symbol in the plot and the legend. Clicking on counter opens a color chooser. This enables the user to define a custom color for any symbol. The colors are remembered for each symbol. For example, if the user finds a symbol, changes the color, deletes the symbol, and finally finds that symbol again, the last color assigned to this symbol is remembered.
 
 ### Features with more than one symbol assigned should be separated by semicolon to enable multi-find
 
-Symbols can also be found by clicking the symbol name in the table. If a feature is associated with two or more symbols separated by semicolons, all symbols added to search box as separate labels. The color assigned to the first symbol in the list is used for highlighting the respective feature. For example, a feature might be associated with the symbol "Kif1b;Cort". This means it belongs to the gene "Kif1b" as well as "Cort". When clicking on the symbol annotation "Kif1b;Cort" in the table, both gene symbols will be added to the search box as separate entities. Features annotated with "Kif1b" or "Cort" will be highlighted. Features annotated with multiple symbols including "Kif1b" or "Cort" (for example "Kif1b;Cort") will be highlighted separatedly in the same color as the first symbol in the compound string (in this case the color of Kif1b).
+Symbols can also be found by clicking the symbol name in the table. If a feature is associated with multiple symbols (separated by semicolons) all symbols are added to search box as separate labels. The color assigned to the first matching symbol in the search box is used for highlighting the respective feature. For example, a feature might be associated with the symbol "Kif1b;Cort". This means it belongs to the gene "Kif1b" as well as "Cort". When clicking on the symbol annotation "Kif1b;Cort" in the table, both gene symbols will be added to the search box as separate entities. Features annotated with "Kif1b" or "Cort" will be highlighted. Features annotated with multiple symbols including "Kif1b" or "Cort" (for example "Kif1b;Cort") will be highlighted separately in the same color as the first matching symbol in the search box.
 
 ## DEIVA input file format
 
-DEIVA accepts input files in two different input formats. Both input file formats are simple ASCII files containing a certain number of columns, either all tab- or comma-separated. Additional columns can be added as the user sees fit and are included in the table and can therefore be searched and sorted by, but have no effect on plot rendering. We refer to the two possible input file formats as the "DESeq2 flavour" and the "edgeR flavour". This alludes to the fact that these input file formats can be generated most easily when the differential gene expression test has been done with DESeq2 or edgeR respectively. However, DEIVA is on no way specific to DESeq2 or edgeR; the reason why the input file formats of DEIVA are designed in a way to ease working with these two packages is entirely for convenience and because we assume that DESeq2 and edgeR are maybe the most popular packages for differential gene expression testing.
+DEIVA accepts input files in two different input formats. Both input file formats are simple ASCII files containing a certain number of columns, either all tab- or comma-separated. Additional columns can be added as the user sees fit and are included in the table and can, therefore, be searched and sorted by, but have no effect on plot rendering. We refer to the two possible input file formats as the "DESeq2 flavour" and the "edgeR flavour". This alludes to the fact that these input file formats can be generated most easily when the differential gene expression test has been done with DESeq2 or edgeR respectively. However, DEIVA is in no way specific to DESeq2 or edgeR; the input file formats of DEIVA are designed in a way to ease working with these two packages as we assume that DESeq2 and edgeR are the most popular packages for differential gene expression testing.
 
 Please keep in mind that neither DESeq2 nor edgeR have an "output format" as such, the exact format in which you write the resulting tables to disk depends on which function in R you use.
 
-The number of required columns are six for the DESeq2 flavour and seven for the edgeR flavour.
+The number of required columns are six for the DESeq2 flavor and seven for the edgeR flavor.
 
 ### DESeq2 flavor
 
@@ -90,13 +74,13 @@ The input file needs to have the following columns:
 * pvalue
 * padj
 
-The header *does* contain an entry for the first column! Typically, when wrinting a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
+The header *does* contain an entry for the first column! Typically, when writing a data frame from R, containing the result of a DESeq2 analysis, a user might omit the first entry and keep the first column unnamed - however it is required in this application.
 
-DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be name appropriately (.tsv for tab separated, .csv for comma separated).
+DESeq2 does not have a standard output file format. Write the result of a differential expression test to a file with TAB or COMMA as the separator and no hyphens to delineate fields.  The file should be named appropriately (.tsv for tab separated, .csv for comma separated).
 
-The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and symbols. A feature can be associated multiple times with the same symbol (or even list of symbols).
+The DESeq2 output is augmented by one column: `symbol`. This contains a symbol (or multiple symbols separated by semicolons) associated with the feature (cluster, transcription initiation site) of interest. These symbols are searched for when using the "Locate symbol" feature. The feature column can not be used for this, because there is no one-to-one relationship between features and symbols. Multiple features may be associated with the same symbol (or even list of symbols).
 
-The `symbol` column will typically contain gene names or gene symbols associated with the respective feature, but can contain any annnotation desired (cluster names, protein identifiers...).
+The `symbol` column will typically contain gene names or gene symbols associated with the respective feature, but can contain any annotation desired (cluster names, protein identifiers...).
 
 Example for a DEIVA input file:
 
@@ -106,11 +90,10 @@ Example for a DEIVA input file:
 | chr12\_54086426\_54086466\_+	| Pcp2 | 5.30160933550825 | 1.61745325417192 | 4.82390235826869 | 0.335299749879769 | 0.737398982387807 | 0.864181693747462 |
 | chr7\_36876604\_36876766\_+	| n/a | 1.18273903072599 | -6.06413567391466 | 3.87533117153996 | 1.564804504567 | 0.117628755226941 | 0.585133009869474 |
 
-**The symbol column is optional.**
-
-**Columns may appear in any order.**
-
-**Multiple symbols in the symbol column must be separated by semicolons.**
+Note:
+- The symbol column is optional.
+- Columns may appear in any order.
+- Multiple symbols in the symbol column must be separated by semicolons.
 
 ### edgeR flavor
 
@@ -167,13 +150,13 @@ rm -rf annotated/
 Start the development server:
 
 ```sh
-gulp dev --dataset=./dataset/DEIVA/
-# navigate to http://localhost:9000
+gulp dev --dataset=./dataset/DEIVA/ --bundle --open
+# http://localhost:9000 will be opened in your default browser
 ```
 
 # About Project χ
 
-This website was built using the [Project χ platform](https://github.com/Hypercubed/Project-chi). Project χ (pronounced project kai or /<abbr title="/ˈ/ primary stress follows">ˈ</abbr><abbr title="'k' in 'kind'">k</abbr><abbr title="/iː/ long 'e' in 'bead'">iː</abbr>/) is an modular open source visualization gallery toolkit built by Jayson Harshbarger at the [RIKEN Institute in Yokohama Japan](http://www.yokohama.riken.jp/english/).  It offers a template and toolset for building self-hosted data-centric visualization websites. Geared towards sharing of supplemental materials associated with scientific publications; Project χ allows visitors to interact with visualizations, download associated data and images, and even try the visualization with their own uploaded or publicly available datasets.  For developers the framework comes packaged with tools necessary for quickly integrating interactive visualizations using [d3.js](http://d3js.org/), [AngularJS](https://angularjs.org/), and [BioJS](http://biojs.io/). More information can be found [here](https://github.com/Hypercubed/Project-chi#readme).
+This website was built using the [Project χ platform](https://github.com/Hypercubed/Project-chi). Project χ (pronounced project kai or /<abbr title="/ˈ/ primary stress follows">ˈ</abbr><abbr title="'k' in 'kind'">k</abbr><abbr title="/iː/ long 'e' in 'bead'">iː</abbr>/) is a modular open-source toolkit for building web and electron data visualization applications built by Jayson Harshbarger at the [RIKEN Institute in Yokohama Japan](http://www.yokohama.riken.jp/english/).  It offers a template and toolset for building self-hosted data-centric visualization websites. Geared towards sharing of supplemental materials associated with scientific publications; Project χ allows visitors to interact with visualizations, download associated data and images, and even try the visualization with their own uploaded or publicly available datasets.  For developers the framework comes packaged with tools necessary for quickly integrating interactive visualizations using [d3.js](http://d3js.org/), [AngularJS](https://angularjs.org/), and [BioJS](http://biojs.io/). More information can be found [here](https://github.com/Hypercubed/Project-chi#readme).
 
 # Contact
 
