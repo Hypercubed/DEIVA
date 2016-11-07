@@ -14,6 +14,7 @@
 * [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
    * [Pre-built](#pre-built)
    * [Building from source](#building-from-source)
+* [Shiny prototype](#shiny-prototype)
 * [About Project χ](#about-project-χ)
 * [Contact](#contact)
 * [How to cite](#how-to-cite)
@@ -153,6 +154,12 @@ Start the development server:
 gulp dev --dataset=./dataset/DEIVA/ --bundle --open
 # http://localhost:9000 will be opened in your default browser
 ```
+
+# Shiny prototype
+
+A prototype of DEIVA has been implemented using R/Shiny: [Shiny prototype](https://github.com/antonkratz/deiva_github).
+
+This prototype is a very minimal implementation which allows locating and identifying features. The code in that Git repository is under MIT license as well and can serve as a starting point for another direction of DEIVA, in particular the integration of DEIVA with the differential gene expression algorithm itself. This would be a framework which necessitates a running R server in the background.
 
 # About Project χ
 
