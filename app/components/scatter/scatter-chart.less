@@ -1,0 +1,136 @@
+#_scatter__chart {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  text {
+    font-size: 11px;
+  }
+
+  .axis .label {
+    font-size: 12px;
+    text-anchor: middle;
+  }
+
+  .title {
+    font-size: 14px;
+    text-anchor: middle;
+  }
+
+  .superscript {
+    font-size: 8px;
+  }
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  circle.point {
+    cursor: pointer;
+    stroke: none;
+    stroke-width: 1px;
+  }
+
+  circle.highlight,
+  circle.swatch {
+    stroke: white;
+    stroke-width: 1px;
+    stroke-opacity: 0.8;
+  }
+
+  circle.highlight:hover,
+  circle.swatch:hover {
+    stroke-width: 1.5px;
+    stroke-opacity: 1;
+  }
+
+  .mid-line {
+    fill: none;
+    stroke: #A3A3A3;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+  }
+
+  .hexagons {
+    stroke: none;
+    /* shape-rendering: optimizeSpeed; */
+  }
+
+  .extent {
+    fill: #000;
+    fill-opacity: .125;
+    stroke: #fff;
+  }
+
+  g.hexagons path {
+    stroke-width: 1;
+    stroke: white;
+    stroke-opacity: 0.5;
+  }
+
+  .spinner-icon {
+    opacity: 0;
+    transition: opacity linear .3s;
+    -webkit-transition-delay: 0.1s;
+    transition-delay: 0.1s;
+  }
+
+  &.dirty .spinner-icon {
+    position:absolute;
+    left:50%;
+    margin-left:-14px;
+    top:50%;
+    margin-top:-15px;
+    width: 28px;
+    height: 28px;
+
+    border: solid 4px transparent;
+    border-top-color:  #29d;
+    border-left-color: #29d;
+    border-radius: 50%;
+
+    opacity: 1;
+    transition: opacity linear .3s;
+    transition-delay: 0.1s;
+
+    animation:         loading-bar-spinner 400ms linear infinite;
+  }
+
+  &.dirty svg {
+    opacity: 0.5;
+    transition: opacity linear .3s;
+    transition-delay: 0.1s;
+  }
+
+  &.hover svg {
+    opacity: 0.5;
+  }
+
+  &.hover {
+    outline: 2px dashed grey;
+  }
+
+  &.hover .drop-here {
+    visibility: visible;
+  }
+}
+
+.d3-tip-scatter {
+  width: 300px;
+  text-align: center;
+  font: 11px sans-serif;
+  color: #b0c4de;
+
+  p {
+    color: #fff;
+  }
+
+  &.animate {
+    left: 0;  top: 0;
+    opacity: 0;
+    transition: left 0.2s ease-out, top 0.2s ease-out, opacity 0.2s ease-out;
+  }
+}

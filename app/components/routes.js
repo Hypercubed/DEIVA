@@ -1,20 +1,18 @@
 import angular from 'angular';
 
-import errorHTML from 'components/error/error.html!text';
-
-import grid from 'common/services/grid/grid';
-
 import 'ui-select/dist/select';
 import 'ui-select/dist/select.css!';
 
-import angularSlider from 'angularjs-slider';
-import './scatter/slider.css!';
-
-import 'intro.js/introjs.css!';
-import 'angular-intro.js';
+import grid from 'common/services/grid/grid';
+import slider from 'common/directives/slider/index';
+import intro from './intro/index';
 
 import scatterComponent from './scatter/scatter.component';
 import aboutComponent from './about/about.component';
+
+import 'spectrum-colorpicker';
+import 'spectrum-colorpicker/spectrum.css!';
+import 'angular-spectrum-colorpicker';
 
 configRoute.$inject = ['$routeProvider'];
 function configRoute($routeProvider) {
@@ -23,27 +21,26 @@ function configRoute($routeProvider) {
       template: '<about></about>'
     })
     .when('/error', {
-      template: errorHTML
+      templateUrl: 'components/error/error.html'
     })
     .when('/404', {
-      template: errorHTML
+      templateUrl: 'components/error/error.html'
     })
     .when('/', {
-      template: '<scatter data-package="$resolve.dataPackage"></scatter>',
+      template: `<scatter data-package="$resolve.dataPackage"></scatter>`,
       datapackageUrl: 'data/datapackage.json'
     })
     .otherwise({redirectTo: '/'});
 }
 
-const routes = angular
+export default angular
   .module('routes', [
     grid,
+    intro,
     'ui.select',
-    'angular-intro',
-    angularSlider.name])
+    'angularSpectrumColorpicker',
+    slider])
   .component('scatter', scatterComponent)
   .component('about', aboutComponent)
   .config(configRoute)
   .name;
-
-export default routes;

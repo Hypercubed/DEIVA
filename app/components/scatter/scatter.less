@@ -1,0 +1,97 @@
+scatter {
+
+  @media (min-width: 992px) {
+    .chart-height {
+      height: 600px;
+      overflow-y: auto;
+    }
+  }
+
+  .expression-grid {
+    font-size: 12px;
+  }
+
+  /* disable menu animation */
+  .ui-grid-menu-mid {
+    -webkit-transition: none !important;
+    transition: none !important;
+  }
+
+  .file-dropzone.hover {
+    outline: 2px dashed grey;
+  }
+
+  .fa-stack.zoom-extent {
+    width: 1em;
+    height: 1em;
+    line-height: 1em;
+  }
+
+  .fa-stack.zoom-extent .fa-square-o {
+    left: -3px;
+    top: -3px;
+    width: 0.5em;
+  }
+
+  .chart-well {
+    position: relative;
+  }
+
+  .chart-toolbar {
+    font-size: 14px;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .drop-here {
+    position:absolute;
+    left:0;
+    margin-left:0;
+    top:0;
+    margin-top:0;
+    width:100%;
+    height:100%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:30px;
+
+    visibility: hidden;
+  }
+
+  .ui-select-match {
+    overflow: hidden;
+  }
+}
+
+.symbol-badge.badge {
+  font-size: 85%;
+
+  .sp-preview {
+    display: none;
+  }
+
+  .sp-replacer {
+    margin: 0;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    display: inline-block;
+    border: none;
+    background: none;
+    color: #333;
+    vertical-align: middle;
+    width: 25px;
+    margin-left: -15px;
+  }
+
+  .sp-dd {
+    padding: 2px 0;
+    height: auto;
+    line-height: inherit;
+    float: right;
+    font-size: 10px;
+  }
+}

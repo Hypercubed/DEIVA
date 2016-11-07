@@ -8,3 +8,6 @@ node_modules
 .vscode
 app/data/*
 !app/data/.keep
+
+cypress/screenshots
+cypress/fixtures

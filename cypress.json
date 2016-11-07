@@ -1,0 +1,9 @@
+{
+  "projectId": "dfa169c8-ba95-4ded-a125-fd2217a45f5b",
+  "requestTimeout": 10000,
+  "responseTimeout": 10000,
+  "pageLoadTimeout": 10000,
+  "defaultCommandTimeout": 20000,
+  "execTimeout": 10000,
+  "baseUrl": "http://localhost:9000/#"
+}

@@ -3,16 +3,22 @@
 import d3 from 'd3';
 
 import crossfilter from 'crossfilter';
-import _ from 'lodash';
+import {debounce, flatMap, values} from 'lodash';
 import Clipboard from 'clipboard';
+
+import {transaction} from 'mobx';
+
+import {introOptions} from '../intro/index';
 
 // import dp from 'common/services/datapackage/datapackage';
 
-import steps from './intro.json!';
+/* import steps from './intro.json!';
 import hello from './intro.md!';
-import thankYou from './intro-end.md!';
+import thankYou from './intro-end.md!'; */
 
 import ScatterChart from './scatter-chart';
+
+// useStrict(true);
 
 const cellTemplate = `
 <div class="ui-grid-cell-contents">
@@ -21,7 +27,7 @@ const cellTemplate = `
       {{COL_FIELD}}
     </span>
     <span ng-switch-default>
-      <a href ng-click="grid.appScope.main.pasteSymbols(COL_FIELD)">
+      <a href ng-click="grid.appScope.$ctrl.toggleSymbols(COL_FIELD)">
         {{COL_FIELD}}
       </a>
     </span>
@@ -59,7 +65,7 @@ const gridOptions = {
   exporterMenuAllData: false
 };
 
-steps[0].intro = hello;
+/* steps[0].intro = hello;
 steps[steps.length - 1].intro = thankYou;
 
 // setup intro
@@ -68,13 +74,30 @@ const introOptions = {
   showStepNumbers: false,
   exitOnOverlayClick: true,
   exitOnEsc: true
-};
+}; */
 
 const sliderOpts = {
   showTicksValues: true,
   showTicks: true,
   enforceStep: false
 };
+
+function persistantColorStore(defaultColorScale) {
+  defaultColorScale = defaultColorScale || d3.scale.category10();
+
+  const map = Object.create(null);
+
+  return Object.freeze({
+    scale,
+    map
+  });
+
+  function scale(id) {
+    const color = map[id] || defaultColorScale(id);
+    map[id] = color;
+    return color;
+  }
+}
 
 controller.$inject = ['$scope', 'dataService', '$log', '$timeout', 'growl'];
 function controller($scope, dataService, $log, $timeout, growl) {  // eslint-disable-line max-params
@@ -83,8 +106,9 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   let isEdgeR = false;
 
   // chart
-  const $chart = d3.select('#_scatter__chart');
-  const colorScale = d3.scale.category10();
+  const $container = d3.select('#_scatter__chart');
+  const colorScale = persistantColorStore(d3.scale.category10());
+  const highlightColor = d3.scale.ordinal();
 
   const x = {
     MA: d => Math.log10(d.baseMean),
@@ -97,10 +121,10 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   };
 
   const chart = new ScatterChart({
-    width: parseInt($chart.style('width'), 10),
+    width: parseInt($container.style('width'), 10),
     height: 530,
     margin: {top: 30, right: 100, bottom: 40, left: 40},
-    highlightColor: colorScale
+    highlightColor: colorScale.scale
   });
 
   // clipboard
@@ -115,88 +139,107 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     );
   });
 
-  // sliderOpt
-  const fcAlphaSlider = {
-    showTicksValues: false,
-    showTicks: false,
-    enforceStep: false,
-    floor: 0,
-    ceil: 1,
-    step: 0.01,
-    precision: 2,
-    onEnd: updateChartData,
-    translate: (value, sliderId, label) => {
-      switch (label) {
-        case 'model':
-          return `Opacity: ${value}`;
-        default:
-          return value;
+  const sliders = {
+    alpha: {
+      showTicksValues: false,
+      showTicks: false,
+      enforceStep: false,
+      floor: 0,
+      ceil: 1,
+      step: 0.01,
+      precision: 2,
+      onEnd: updateChartData,
+      translate: (value, sliderId, label) => {
+        switch (label) {
+          case 'model':
+            return `Opacity: ${value}`;
+          default:
+            return value;
+        }
       }
+    },
+    fccut: {
+      ...sliderOpts,
+      floor: 0,
+      ceil: 5,
+      step: 1,
+      onEnd: updateChartData
+    },
+    logpcut: {
+      ...sliderOpts,
+      floor: -5,
+      ceil: 0,
+      step: 1,
+      onEnd: updateChartData
+    },
+    bmcut: {
+      ...sliderOpts,
+      floor: -5,
+      ceil: 5,
+      step: 1,
+      onEnd: updateChartData
     }
   };
 
-  const fcCutSlider = {
-    ...sliderOpts,
-    floor: 0,
-    ceil: 5,
-    step: 1,
-    onEnd: updateChartData
-  };
-
-  const fdrCutSlider = {
-    ...sliderOpts,
-    floor: -5,
-    ceil: 0,
-    step: 1,
-    onEnd: updateChartData // () => {
-      // main.plotState.pcut = Math.pow(10, Number(main.plotState.logpcut));
-      // updateChartData();
-    // } // ,
-    // translate: value => `1e${value}`
-  };
-
   // debounced functions
-  const δdrawChart = _.debounce(() => {
-    $chart.selectAll('svg').remove();
+  const δdrawChart = debounce(() => {
+    $container.selectAll('svg').remove();
 
-    $chart.datum(main.dataState.data)
+    $container.select('.chart').datum(main.dataState.data)
       .call(chart);
 
-    $chart.classed('dirty', false);
-  }, 100);
+    $container.classed('dirty', false);
+  }, 30);
 
-  const δupdateList = _.debounce(() => {
+  const δupdateList = debounce(() => {
     $scope.$applyAsync(() => {
       updateList();
     });
-  }, 100);
+  }, 30);
 
-  const δchartAction = _.debounce(action => {
-    $chart.classed('dirty', true);
+  const δchartAction = debounce(action => {
+    $container.classed('dirty', true);
     $scope.$applyAsync(() => {
       chart[action]();
       // updateList();
-      $chart.classed('dirty', false);
+      $container.classed('dirty', false);
     });
-  }, 100);
+  }, 30);
+
+  const dataPackage = main.dataPackage;
+  const resources = dataPackage.resources.slice();
+  const experimentList = resources[0].data;
 
   return Object.assign(main, {
+    resources,
+    experimentList,
     editorOptions: {
-      data: main.dataPackage,
+      data: dataPackage,
       enableOpen: false
     },
-    gene: main.dataPackage.resources[0].data[0].gene,
+    gene: experimentList[0].gene,
+    selectedData: experimentList[0],
     geneList: [],
+    colorMap: colorScale.map,
+    uiState: {
+      dataset: true,
+      locate: true,
+      filters: true,
+      plot: true,
+      fccut: true,
+      logpcut: true,
+      bmcut: true
+    },
     plotState: {
       // pcut: 0.1,
       fccut: 0,
+      bmcut: -5,
       logpcut: -1,
       alpha: 0.8,
       plot: 'hex',
-      plotType: 'MA',
-      colorScale // maybe shouldn't be state
+      plotType: 'MA'
     },
-    selectedData: main.dataPackage.resources[0].data[0],
+    xLabel,
     upDown: [0, 0],
     // colorScale,
     dataState: {},
@@ -212,34 +255,66 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       addSymbols(list);
       updateChartData();
     },
+    toggleSymbols: sym => {
+      addSymbols(sym, true);
+      updateChartData();
+    },
     chart,
-    $chart,
+    $container,
     updateList: δupdateList,
-    fcAlphaSlider,
+    /* fcAlphaSlider,
     fcCutSlider,
     fdrCutSlider,
+    bmCutSlider, */
+    sliders,
     chartAction: δchartAction,
     $onInit: () => {
+      // set UI state
+      // TODO: load from local storage?
+      Object.assign(main.uiState, {
+        dataset: true,
+        locate: true,
+        filters: true,
+        plot: true,
+        fccut: true,
+        logpcut: true,
+        bmcut: true
+      });
+
       chart.brush.on('brushend.select', δupdateList);
-      loadDataset(main.dataPackage.resources[0].data[0]);
+      return loadDataset(experimentList[0]);
     }
   });
 
   function loadDataset(set) {
-    dataService.loadResource(main.dataPackage, {
-      title: set.name,
-      path: set.filename,
-      schema: main.dataPackage.schemas.deseq2oredgeR
-    })
-      .then(r => {
-        if (r.$error) {
-          $log.error(r);
-          return $chart.classed('dirty', false);
-        }
-        main.dataPackage.resources[1] = r;
-        main.gene = set.gene || set.symbols || '';
-        change();
-      });
+    $container.classed('dirty', true);
+
+    return transaction(() => {
+      return dataService.loadResource(dataPackage, {
+        name: set.name,
+        title: set.name,
+        path: set.filename,
+        data: [],
+        content: '' // ,
+        // schema: dataPackage.schemas.deseq2oredgeR
+      })
+        .then(r => {
+          if (r.$error) {
+            $log.error(r);
+            return $container.classed('dirty', false);
+          }
+          if (dataPackage.resources.length > 1) {
+            dataPackage.resources.pop().stop();
+          }
+          dataPackage.resources.push(r);
+
+          main.resources = dataPackage.resources.slice();
+
+          main.gene = set.gene || set.symbols || '';
+          main.geneList = [];
+          return change(r.data);
+        });
+    });
   }
 
   function updateList() {
@@ -280,82 +355,97 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     }
 
     const pcut = Math.pow(10, Number(main.plotState.logpcut));
-    const fccut = main.plotState.fccut;
-    const cutoffCheck = d => d.padj <= pcut && (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
+    const fccut = Number(main.plotState.fccut);
 
-    const genesSearch = main.geneList.map(x => x.symbol);
+    let cutoffCheck;
+    if (isEdgeR) {
+      const bmcut = Number(main.plotState.bmcut);
+      cutoffCheck = d =>
+        d.padj <= pcut &&
+        d.logCPM > bmcut &&
+        (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
+    } else {
+      const bmcut = Math.pow(10, Number(main.plotState.bmcut));
+      cutoffCheck = d =>
+        d.padj <= pcut &&
+        d.baseMean > bmcut &&
+        (d.log2FoldChange > fccut || d.log2FoldChange < -fccut);
+    }
 
-    const geneCheck = d => {
-      for (let i = 0; i < d.symbols.length; i++) {
-        for (let j = 0; j < genesSearch.length; j++) {
-          if (genesSearch[j] === d.symbols[i]) {
-            return j;
-          }
-        }
-      }
-      return -1;
-    };
+    // List of symbols to highlight
+    const symbolDomain = main.geneList.map(x => x.symbol);
 
-    const d = main.dataState.data.filter(d => {  // update and filter by cutoff
+    highlightColor
+      .domain(symbolDomain)
+      .range(symbolDomain.map(colorScale.scale));
+
+    // update and filter by cutoff
+    const d = main.dataState.data.filter(d => {
       d.$cutoffCheck = cutoffCheck(d);
-      d.highlight = geneCheck(d);
-      d.$showPoint = d.highlight > -1;
+      d.highlight = symbolDomain.find(symbol => d.symbols.includes(symbol));  // gene to highlight
       return d.$cutoffCheck;
     });
 
-    const resource = main.dataPackage.resources[1];
+    const resource = dataPackage.resources[1];
+    const plotType = main.plotState.plotType;
+    const width = parseInt($container.style('width'), 10);
 
     chart
-      .x(x[main.plotState.plotType])
+      .x(x[plotType])
       .y(d => d.log2FoldChange || 0)
-      .xLabel(xLabel[main.plotState.plotType])
+      .xLabel(xLabel[plotType])
       .yLabel('log2FoldChange')
       .title(resource.title || resource.name)
       .showScatter(main.plotState.plot === 'scatter')
       .showDensity(main.plotState.plot === 'hex')
-      // .highlightFilter(geneCheck)
-      .highlightDomain(genesSearch)
+      .highlightColor(highlightColor)
       .alpha(main.plotState.alpha)
-      .width(parseInt($chart.style('width'), 10))
-      // .cutoffFilter(cutoffCheck)
-      ;
+      .width(width);
 
     // Update up/down count
     main.upDown[0] = d.filter(d => d.log2FoldChange > 0).length;
     main.upDown[1] = d.length - main.upDown[0];
   }
 
-  function updateChartData() {
-    $log.debug('update');
-    $chart.classed('dirty', true);
-    setupChart();
-    δchartAction('updatePoints');
-  }
-
-  function change() {
+  function change(data) {
     $log.debug('change');
-    $chart.classed('dirty', true);
-    $timeout(() => {
-      processData();
-      drawChart();
-    });
+    $container.classed('dirty', true);
+    data = data || main.resources[1].data;
+    isEdgeR = typeof data.logCPM !== 'undefined';
+
+    // console.time('processDataWorker');
+    // worker.postMessage(data);
+
+    return $timeout(() => {
+      // console.time('processData');
+      data = processData(data);
+      // console.timeEnd('processData');
+      setupUI(data);
+      setupChart();
+      δdrawChart();
+    }, 10);
   }
 
   function drawChart() {
     $log.debug('draw');
-    $chart.classed('dirty', true);
+    $container.classed('dirty', true);
     setupChart();
     δdrawChart();
   }
 
-  function processData() {
-    $log.debug('processData');
-    const resource = main.dataPackage.resources[1];
+  function updateChartData() {
+    $log.debug('update');
+    $container.classed('dirty', true);
+    setupChart();
+    δchartAction('updatePoints');
+  }
 
-    const sample = resource.data[0];
+  function setupUI(data) {
+    $log.debug('sutupUI');
 
-    isEdgeR = typeof sample.baseMean === 'undefined' && typeof sample.logCPM !== 'undefined';
+    const resource = dataPackage.resources[1];
 
+    // Here we modify the x value and x-asix label if the file type is edgeR
     if (isEdgeR) {
       x.MA = d => d.logCPM;
       xLabel.MA = 'logCPM';
@@ -364,27 +454,20 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
       xLabel.MA = 'log10 baseMean';
     }
 
-    const data = resource.data.filter(d => {
-      d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
-      delete d.PValue;
+    const xExtent = d3.extent(data, x.MA);
+    xExtent[0] = Math.floor(xExtent[0]);
+    xExtent[1] = Math.ceil(xExtent[1]);
 
-      d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
-      delete d.FDR;
+    sliders.bmcut.floor = xExtent[0];
+    sliders.bmcut.ciel = xExtent[1];
 
-      if (isEdgeR) {
-        d.baseMean = Math.pow(2, Number(d.logCPM)) || 0.001;
-        d.logCPM = Number(d.logCPM);
-      } else {
-        d.baseMean = Number(d.baseMean) || 0.001;
-      }
-
-      d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
-      delete d.logFC;
-
-      d.symbol = d.symbol || d.feature;
-      d.symbols = d.symbol.split(';');
-
-      return d.baseMean > 0.001;
+    Object.assign(main.plotState, {
+      fccut: 0,
+      bmcut: xExtent[0],
+      logpcut: -1,
+      alpha: 0.8,
+      plot: 'hex',
+      plotType: 'MA'
     });
 
     const ignoredKeys = [
@@ -445,52 +528,85 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
 
     $log.debug('getting unique symbols');
 
-    const fullGeneList = [];
+    // const fullGeneList = _.flatMap(data, d => d.symbols).sort();
 
-    data
-      .forEach(x => {
-        x.symbols.forEach(s => {
+    /* data
+      .forEach(d => {
+        d.symbols.forEach(s => {
           fullGeneList.push(s);
         });
+      }); */
+
+    // fullGeneList.sort();
+
+    const uniqGeneMap = Object.create(null);
+    flatMap(data, d => d.symbols)
+      .sort()
+      .forEach(symbol => {
+        const item = uniqGeneMap[symbol] || (uniqGeneMap[symbol] = {symbol, count: 0});
+        item.count++;
       });
 
-    fullGeneList
-      .sort();
-
-    $log.debug('done getting unique symbols', fullGeneList.length);
-
-    const uniqGeneMap = {};
-    const uniqGeneList = [];
-    fullGeneList.forEach(symbol => {
-      const item = uniqGeneMap[symbol];
-      if (item) {
-        item.count++;
-      } else {
-        uniqGeneMap[symbol] = {
-          symbol,
-          count: 1
-        };
-        uniqGeneList.push(uniqGeneMap[symbol]);
-      }
-    });
-
     main.uniqGeneMap = uniqGeneMap;
-    main.uniqGeneList = uniqGeneList;
+    main.uniqGeneList = values(uniqGeneMap);
+
+    $log.debug('done getting unique symbols', main.uniqGeneList.length);
 
     main.geneList = [];
-    addSymbols(main.gene);
+    return addSymbols(main.gene);
   }
 
-  function addSymbols(list) {
+  function processData(data) {
+    $log.debug('processData');
+    return data.filter(d => {
+      // ID	Gene_Symbol	baseMean	log2FoldChange	pvalue	padj
+      d.pvalue = Number(d.pvalue) || Number(d.PValue);  // P-Value
+      delete d.PValue;
+
+      d.padj = Number(d.padj) || Number(d.FDR) || NaN;  // FDR
+      delete d.FDR;
+
+      if (typeof d.logCPM === 'undefined') {
+        d.baseMean = Number(d.baseMean) || NaN;
+      } else {
+        d.baseMean = Math.pow(2, Number(d.logCPM)) || NaN;
+        d.logCPM = Number(d.logCPM);
+      }
+
+      d.log2FoldChange = Number(d.log2FoldChange) || Number(d.logFC) || 0;  // Log2 Fold Change
+      delete d.logFC;
+
+      d.feature = d.feature || d.ID;
+      delete d.ID;
+
+      d.symbol = d.symbol || d.Gene_Symbol || d.feature;
+      delete d.Gene_Symbol;
+
+      d.symbols = d.symbol.split(';');
+
+      return !isNaN(d.baseMean); // d.baseMean > 0.001;
+    });
+  }
+
+  function addSymbols(list, toggle = false) {
     if (typeof list !== 'string' || list.length === 0) {
       return;
     }
+    const arr = main.geneList;
     const missing = [];
     list.split(/[\s;]/).forEach(symbol => {
       const item = main.uniqGeneMap[symbol];
       if (item) {
-        if (!main.geneList.includes(item)) {
-          main.geneList.push(item);
+        const index = arr.indexOf(item);
+        if (index > -1) {
+          if (toggle) {
+            arr.splice(index, 1);
+            item.selected = false;
+          }
+        } else {
+          arr.push(item);
+          item.selected = true;
+          colorScale.scale(item.symbol); // set color
         }
       } else {
         missing.push(symbol);
@@ -498,8 +614,8 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
     });
     if (missing.length > 0) {
       const msg = missing.join(', ');
-      console.error('Genes not found', msg);
-      growl.error(msg, {title: 'Genes not found'});
+      $log.error('Symbols not found', msg);
+      growl.error(msg, {title: 'Symbols not found'});
     }
   }
 
@@ -508,32 +624,33 @@ function controller($scope, dataService, $log, $timeout, growl) {  // eslint-dis
   }
 
   function dropped(file) {
-    $chart.classed('dirty', true);
+    $container.classed('dirty', true);
 
     const mediatype = file.type || dataService.mime.lookup(file.name);
 
-    const newResource = dataService.processResource({
-      path: file.name || 'file',
-      name: file.name || 'file',
-      mediatype: (mediatype === 'text/plain') ? 'text/tab-separated-values' : mediatype,
-      content: file.content || '',
-      active: true,
-      $error: false,
-      $errors: [],
-      schema: main.dataPackage.schemas.deseq2oredgeR
+    const newResource = dataPackage.resources[1];
+    transaction(() => {
+      Object.assign(newResource, {
+        title: file.name,
+        path: file.name || 'file',
+        name: file.name || 'file',
+        mediatype: (mediatype === 'text/plain') ? 'text/tab-separated-values' : mediatype,
+        schema: dataPackage.schemas.deseq2oredgeR,
+        content: file.content || ''
+      });
     });
 
     if (newResource.$error) {
-      return $chart.classed('dirty', false);
+      return $container.classed('dirty', false);
     }
 
-    main.dataPackage.resources[1] = newResource;
+    // dataPackage.resources[1] = newResource;
 
     main.selectedData = null;
     main.gene = '';
     main.geneList = [];
 
-    main.change();
+    change(newResource.data);
   }
 }
 

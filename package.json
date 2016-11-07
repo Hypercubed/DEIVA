@@ -15,11 +15,12 @@
       "ui-select": "npm:ui-select@^0.16.1"
     }
   },
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.6",
   "private": true,
   "description": "Interactive Visual Analysis of differential gene expression test results",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "xo && cypress run",
+    "version": "chg release -y && git add -A CHANGELOG.md"
   },
   "repository": {
     "type": "git",
@@ -41,11 +42,15 @@
       "browser"
     ],
     "rules": {
-      "import/no-extraneous-dependencies": 0
+      "no-console": "error",
+      "import/no-extraneous-dependencies": 0,
+      "import/no-unresolved": 0
     },
     "ignores": [
       "app/data/**",
-      "gulp/*.js"
+      "gulp/*.js",
+      "cypress/support/**",
+      "scripts/*.js"
     ]
   }
 }
