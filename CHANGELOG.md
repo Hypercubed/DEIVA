@@ -2,10 +2,13 @@ CHANGELOG
 =========
 
 ## HEAD (Unreleased)
-* Fix styles
-* Fix electron
+_(none)_
 
 --------------------
+
+## 1.0.0-beta.7 (2016-11-07)
+* Fix styles
+* Fix electron
 
 ## 1.0.0-beta.6 (2016-10-21)
 * Updates for Project-X v1.0.0-alpha.10
