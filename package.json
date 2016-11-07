@@ -35,22 +35,5 @@
   "devDependencies": {
     "xo": "*"
   },
-  "xo": {
-    "esnext": true,
-    "space": 2,
-    "envs": [
-      "browser"
-    ],
-    "rules": {
-      "no-console": "error",
-      "import/no-extraneous-dependencies": 0,
-      "import/no-unresolved": 0
-    },
-    "ignores": [
-      "app/data/**",
-      "gulp/*.js",
-      "cypress/support/**",
-      "scripts/*.js"
-    ]
-  }
+  "xo": false
 }

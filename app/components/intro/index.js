@@ -5,7 +5,7 @@ import './intro.less!';
 
 import 'angular-intro.js';
 
-import steps from './intro.json!';
+import steps from './intro-data.js';
 import hello from './intro.md!';
 import thankYou from './intro-end.md!';
 
