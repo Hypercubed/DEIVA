@@ -1,8 +1,0 @@
-{
-  "main": "./dgram.js",
-  "map": {
-    "./dgram.js": {
-      "node": "@node/dgram"
-    }
-  }
-}

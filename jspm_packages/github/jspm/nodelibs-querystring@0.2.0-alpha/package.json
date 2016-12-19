@@ -1,9 +1,0 @@
-{
-  "main": "./querystring.js",
-  "registry": "github",
-  "map": {
-    "./querystring.js": {
-      "node": "@node/querystring"
-    }
-  }
-}

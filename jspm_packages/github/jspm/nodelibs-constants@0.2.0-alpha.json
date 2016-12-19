@@ -1,8 +1,0 @@
-{
-  "main": "constants.js",
-  "map": {
-    "./constants.js": {
-      "node": "@node/constants"
-    }
-  }
-}

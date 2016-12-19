@@ -1,8 +1,0 @@
-{
-  "main": "./events.js",
-  "map": {
-    "./events.js": {
-      "node": "@node/events"
-    }
-  }
-}

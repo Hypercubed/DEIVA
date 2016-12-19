@@ -1,9 +1,0 @@
-{
-  "main": "./zlib.js",
-  "map": {
-    "./zlib.js": {
-      "node": "@node/zlib",
-      "browser": "zlib-browserify"
-    }
-  }
-}

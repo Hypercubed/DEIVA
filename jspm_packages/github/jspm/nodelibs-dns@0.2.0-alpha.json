@@ -1,8 +1,0 @@
-{
-  "main": "./dns.js",
-  "map": {
-    "./dns.js": {
-      "node": "@node/dns"
-    }
-  }
-}

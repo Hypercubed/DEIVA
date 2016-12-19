@@ -1,9 +1,0 @@
-{
-  "main": "constants.js",
-  "registry": "github",
-  "map": {
-    "./constants.js": {
-      "node": "@node/constants"
-    }
-  }
-}

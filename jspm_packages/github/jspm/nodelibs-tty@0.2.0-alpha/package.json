@@ -1,9 +1,0 @@
-{
-  "main": "./tty.js",
-  "registry": "github",
-  "map": {
-    "./tty.js": {
-      "node": "@node/tty"
-    }
-  }
-}

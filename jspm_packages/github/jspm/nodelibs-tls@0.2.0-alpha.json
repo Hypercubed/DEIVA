@@ -1,8 +1,0 @@
-{
-  "main": "./tls.js",
-  "map": {
-    "./tls.js": {
-      "node": "@node/tls"
-    }
-  }
-}

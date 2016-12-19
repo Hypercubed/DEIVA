@@ -1,8 +1,0 @@
-{
-  "main": "./querystring.js",
-  "map": {
-    "./querystring.js": {
-      "node": "@node/querystring"
-    }
-  }
-}

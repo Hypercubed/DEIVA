@@ -1,9 +1,0 @@
-{
-  "main": "./child_process.js",
-  "registry": "github",
-  "map": {
-    "./child_process.js": {
-      "node": "@node/child_process"
-    }
-  }
-}

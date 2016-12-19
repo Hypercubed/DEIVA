@@ -1,9 +1,0 @@
-{
-  "main": "./dns.js",
-  "registry": "github",
-  "map": {
-    "./dns.js": {
-      "node": "@node/dns"
-    }
-  }
-}

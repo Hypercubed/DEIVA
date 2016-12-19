@@ -1,9 +1,0 @@
-{
-  "main": "./dgram.js",
-  "registry": "github",
-  "map": {
-    "./dgram.js": {
-      "node": "@node/dgram"
-    }
-  }
-}

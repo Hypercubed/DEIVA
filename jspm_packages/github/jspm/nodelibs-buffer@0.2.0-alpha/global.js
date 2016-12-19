@@ -1,1 +1,0 @@
-module.exports = require('./buffer.js').Buffer;

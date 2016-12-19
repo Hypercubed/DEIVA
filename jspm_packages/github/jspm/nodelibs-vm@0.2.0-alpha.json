@@ -1,8 +1,0 @@
-{
-  "main": "./vm.js",
-  "map": {
-    "./vm.js": {
-      "node": "@node/vm"
-    }
-  }
-}
