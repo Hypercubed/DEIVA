@@ -141,7 +141,7 @@ As an example, here is what the `index.tsv` file looks like for the example data
 
 ## Pre-built
 
-DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch Zip file](https://github.com/Hypercubed/DEIVA/archive/gh-pages.zip) and replace the files in the `data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` to reference the initial data file to load in DEIVA and the `index.tsv` file to contain a list of additional data files available in the interface (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
+DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch Zip file](https://github.com/Hypercubed/DEIVA/archive/gh-pages.zip) and replace the files in the `data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `index.tsv` file to contain a list of additional data files available in the interface (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
 
 ## Building from source
 
