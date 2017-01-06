@@ -14,6 +14,7 @@
 * [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
    * [Pre-built](#pre-built)
    * [Building from source](#building-from-source)
+   * [Standalone](#standalone)
 * [Shiny prototype](#shiny-prototype)
 * [About Project χ](#about-project-χ)
 * [Contact](#contact)
@@ -154,6 +155,10 @@ Start the development server:
 gulp dev --dataset=./dataset/DEIVA/ --bundle --open
 # http://localhost:9000 will be opened in your default browser
 ```
+
+# Standalone
+
+Standalone versions of DEIVA can be found in the [releases](https://github.com/Hypercubed/DEIVA/releases). These have been generated with [ELECTRON](http://electron.atom.io). 
 
 # Shiny prototype
 
