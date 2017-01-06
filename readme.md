@@ -126,7 +126,7 @@ See this git repository, describing how the example input files for DEIVA have b
 
 ### The index file
 
-In addition to the input file(s), it is necessary to provide an index file named `index.tsv`. This is a simple file starting with a header line (filename, name, gene) separated by tab, followed by one line per input file, with three fields perl line, separated by tab: filename (name of the input filename), name (a string describing the entry for that filename in the dropdown) and gene (a space-separated list of genes highlighted by default when this filename is loaded).
+In addition to the input file(s), it is necessary to provide an index file named `index.tsv`. This is a simple file starting with a header line (filename, name, gene) separated by tab, followed by one line per input file, with three fields per line, separated by tab: filename (name of the input filename), name (a string describing the entry for that filename in the dropdown) and gene (a space-separated list of genes highlighted by default when this filename is loaded).
 
 As an example, here is what the `index.tsv` file looks like for the example data set in the live instance demo:
 
