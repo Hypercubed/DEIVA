@@ -11,9 +11,11 @@
    * [DESeq2 flavor](#deseq2-flavor)
    * [edgeR flavor](#edger-flavor)
    * [Detailed example on generating DESeq2 and edgeR-based input files](#detailed-example-on-generating-deseq2-and-edger-based-input-files)
+   * [The index file](#the-index-file)
 * [Deploying DEIVA with your own data](#deploying-deiva-with-your-own-data)
    * [Pre-built](#pre-built)
    * [Building from source](#building-from-source)
+* [Standalone](#standalone)
 * [Shiny prototype](#shiny-prototype)
 * [About Project χ](#about-project-χ)
 * [Contact](#contact)
@@ -122,11 +124,24 @@ See this git repository, describing how the example input files for DEIVA have b
 
 [antonkratz/genome-research-edgeR-DESeq2](https://github.com/antonkratz/genome-research-edgeR-DESeq2.git)
 
+### The index file
+
+In addition to the input file(s), it is necessary to provide an index file named `index.tsv`. This is a simple file starting with a header line (filename, name, gene) separated by tab, followed by one line per input file, with three fields per line, separated by tab: filename (name of the input filename), name (a string describing the entry for that filename in the dropdown) and gene (a space-separated list of genes highlighted by default when this filename is loaded).
+
+As an example, here is what the `index.tsv` file looks like for the example data set in the live instance demo:
+
+| filename        |name    |gene|
+|---	|---	|---	|
+| DESeq2.bound_vs_unbound.tsv     |Bound vs unbound (DESeq2)       |Pcp2 Cacna1g|
+| edgeR.bound_vs_unbound.tsv      |Bound vs unbound (edgeR)        |Pcp2 Cacna1g|
+| DESeq2.bmemb_vs_bcyto.tsv       |Bound membrane vs bound cytoplasm (DESeq2)      |Pcp2 Cacna1g|
+| edgeR.bmemb_vs_bcyto.tsv        |Bound membrane vs bound cytoplasm (edgeR)       |Pcp2 Cacna1g|
+
 # Deploying DEIVA with your own data
 
 ## Pre-built
 
-DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch Zip file](https://github.com/Hypercubed/DEIVA/archive/gh-pages.zip) and replace the files in the `data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `datapackage.json` to reference the initial data file to load in DEIVA and the `index.tsv` file to contain a list of additional data files available in the interface (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
+DEIVA may be used with custom data without modification to the source code.  Download the [gh-pages branch Zip file](https://github.com/Hypercubed/DEIVA/archive/gh-pages.zip) and replace the files in the `data/` with your data.  (See [Preparing input data files](##preparing-input-data-files)).  You will also need to modify the `index.tsv` file to contain a list of additional data files available in the interface (see example [here](https://github.com/Hypercubed/DEIVA/tree/gh-pages/data)).
 
 ## Building from source
 
@@ -154,6 +169,10 @@ Start the development server:
 gulp dev --dataset=./dataset/DEIVA/ --bundle --open
 # http://localhost:9000 will be opened in your default browser
 ```
+
+# Standalone
+
+Standalone versions of DEIVA can be found in the [releases](https://github.com/Hypercubed/DEIVA/releases). These have been generated with [ELECTRON](http://electron.atom.io). 
 
 # Shiny prototype
 
