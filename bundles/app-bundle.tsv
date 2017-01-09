@@ -7,7 +7,7 @@ components/intro/intro.md	1166
 components/intro/intro-end.md	499
 ../chart.utils.js	507
 ../scatter-chart.js	9313
-../scatter.controller.js	12159
+../scatter.controller.js	12179
 ../scatter.component.js	518
 ../header.html	2623
 components/about/readme.md	13094
