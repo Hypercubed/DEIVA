@@ -15,7 +15,7 @@
       "ui-select": "npm:ui-select@^0.16.1"
     }
   },
-  "version": "1.0.0-beta.6",
+  "version": "1.0.1",
   "private": true,
   "description": "Interactive Visual Analysis of differential gene expression test results",
   "scripts": {
@@ -35,22 +35,5 @@
   "devDependencies": {
     "xo": "*"
   },
-  "xo": {
-    "esnext": true,
-    "space": 2,
-    "envs": [
-      "browser"
-    ],
-    "rules": {
-      "no-console": "error",
-      "import/no-extraneous-dependencies": 0,
-      "import/no-unresolved": 0
-    },
-    "ignores": [
-      "app/data/**",
-      "gulp/*.js",
-      "cypress/support/**",
-      "scripts/*.js"
-    ]
-  }
+  "xo": false
 }

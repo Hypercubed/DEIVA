@@ -15,7 +15,7 @@ import 'spectrum-colorpicker/spectrum.css!';
 import 'angular-spectrum-colorpicker';
 
 configRoute.$inject = ['$routeProvider'];
-function configRoute($routeProvider) {
+function configRoute ($routeProvider) {
   $routeProvider
     .when('/about', {
       template: '<about></about>'
@@ -39,7 +39,8 @@ export default angular
     intro,
     'ui.select',
     'angularSpectrumColorpicker',
-    slider])
+    slider
+  ])
   .component('scatter', scatterComponent)
   .component('about', aboutComponent)
   .config(configRoute)

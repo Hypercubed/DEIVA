@@ -6,6 +6,16 @@ _(none)_
 
 --------------------
 
+## 1.0.1 (2017-01-08)
+* Use flatEntityAccess in ui-grid
+
+## 1.0.0 (2016-12-08)
+_(none)_
+
+## 1.0.0-beta.7 (2016-11-07)
+* Fix styles
+* Fix electron
+
 ## 1.0.0-beta.6 (2016-10-21)
 * Updates for Project-X v1.0.0-alpha.10
 * Locate symbol now searches for unique symbol names, features can be associated with multiple symbols separated by a semicolon
