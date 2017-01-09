@@ -62,7 +62,8 @@ const gridOptions = {
   exporterMenuCsv: true,
   exporterMenuPdf: false,
   exporterCsvFilename: 'selection.csv',
-  exporterMenuAllData: false
+  exporterMenuAllData: false,
+  flatEntityAccess: true
 };
 
 /* steps[0].intro = hello;
